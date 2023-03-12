@@ -95,7 +95,7 @@ class Skin: #skin object for detecting movement
         return max_t
     def euclid(self,a,b):
         return np.sqrt(np.sum((a-b)**2))
-    def movement(self,new,MAXD=15):
+    def movement(self,new,MAXD=5):
         arrayA=new.copy()
         arrayB=self.last.copy()
         looped=np.zeros_like(arrayB)
@@ -108,6 +108,7 @@ class Skin: #skin object for detecting movement
                 if distances[min_dist]<MAXD and ind not in used: #make sure within parameters
                     looped[i]=arrayA[ind]
                     used.append(ind)
+            #TODO experiment with adding the unpicked lowest distances instead of the orginal point
             for i, eachPoint in enumerate(arrayB): #fill in gaps
                 if np.sum(looped[i])==0:
                     looped[i]=eachPoint
@@ -131,23 +132,22 @@ while(True):
     if t_.shape[0]>2:
         new=np.zeros_like(frame)
         new[t[:,0],t[:,1]]=(0,255,0)
-        new[t_[:,0],t_[:,1]]=(0,0,255)
+        #new[t_[:,0],t_[:,1]]=(0,0,255)
         new[old_T[:,0],old_T[:,1]]=(255,0,255)
         for i,coord in enumerate(t):
             x1=coord[1]
             y1=coord[0]
             x2=old_T[i][1]
             y2=old_T[i][0]
-            cv2.putText(new,str(i),(x1,y1),cv2.FONT_HERSHEY_SIMPLEX,0.2,(0,255,0))
+            #cv2.putText(new,str(i),(x1,y1),cv2.FONT_HERSHEY_SIMPLEX,0.2,(0,255,0))
             d=skin.euclid(np.array([x1, y1]), np.array([x2, y2]))
-            if d<50:
-                cv2.line(new, (x1, y1), (x2, y2), (0, 255, 0), thickness=1)
-                pass
-    #show user the imagesS
-    cv2.imshow('spots', new)
-    cv2.imshow('binary', im)
-    cv2.imshow('unprocessed', skin.getFrame())
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+            if d<25:
+                cv2.arrowedLine(new, (x2, y2), (x1, y1), (0, 255, 0), thickness=1)
+        #show user the imagesS
+        cv2.imshow('spots', new)
+        cv2.imshow('binary', im)
+        cv2.imshow('unprocessed', skin.getFrame())
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 skin.close()
 cv2.destroyAllWindows()
