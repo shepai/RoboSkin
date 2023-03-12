@@ -95,23 +95,36 @@ class Skin: #skin object for detecting movement
         return max_t
     def euclid(self,a,b):
         return np.sqrt(np.sum((a-b)**2))
-    def movement(self,new,MAXD=5):
+    def loop_through(self,stored,used,looped,arrayA,arrayB,count,maxL=10):
+        if count==maxL:
+            return looped
+        for i, eachPoint in enumerate(arrayB): #loop through distances and pair off
+            distances=np.sqrt(np.sum(eachPoint-arrayA,axis=1)**2)
+            min_dist=distances[np.argmin(distances)]
+            ind=np.argmin(distances)
+            if ind not in used: #make sure within parameters
+                looped[i]=arrayA[ind]
+                used.append(ind)
+                stored[ind]=[min_dist,i]
+            else: #if the index is already used
+                if stored[ind][0]>min_dist: #something found better
+                    j=stored[ind][1] #get old index
+                    looped[i]=arrayA[ind] #set pointer
+                    stored[ind]=[min_dist,i]
+                    looped=self.loop_through(stored,used,looped,arrayA,arrayB,count+1,maxL=maxL)
+        return looped
+    def movement(self,new,MAXD=10):
         arrayA=new.copy()
         arrayB=self.last.copy()
-        looped=np.zeros_like(arrayB)
-        if len(new)>2: #check coords exiat
+        if len(new)>2: #check coords exist
+            stored=np.zeros_like(arrayA+(2,))
+            looped=np.zeros_like(arrayB)
             used=[]
-            for i, eachPoint in enumerate(arrayB): #loop through distances and pair off
-                distances=np.sqrt(np.sum(eachPoint-arrayA,axis=1)**2)
-                min_dist=np.argmin(distances)
-                ind=np.argmin(distances)
-                if distances[min_dist]<MAXD and ind not in used: #make sure within parameters
-                    looped[i]=arrayA[ind]
-                    used.append(ind)
+            looped=self.loop_through(stored,used,looped,arrayA,arrayB,1)
             #TODO experiment with adding the unpicked lowest distances instead of the orginal point
             for i, eachPoint in enumerate(arrayB): #fill in gaps
                 if np.sum(looped[i])==0:
-                    looped[i]=eachPoint
+                    looped[i]=eachPoint.copy()
             self.last=looped.copy()
             return looped
         else:
@@ -125,15 +138,16 @@ frame=skin.getFrame()
 old_T=skin.origin
 new=np.zeros_like(frame)
 
+
 while(True):
     im=skin.getBinary()
+    new=np.zeros_like(frame)
     t_=skin.getDots(im)
     t=skin.movement(t_)
-    if t_.shape[0]>2:
-        new=np.zeros_like(frame)
-        new[t[:,0],t[:,1]]=(0,255,0)
+    if t.shape[0]>2:
+        #new[t[:,0],t[:,1]]=(255,0,0)
         #new[t_[:,0],t_[:,1]]=(0,0,255)
-        new[old_T[:,0],old_T[:,1]]=(255,0,255)
+        #new[old_T[:,0],old_T[:,1]]=(255,0,255)
         for i,coord in enumerate(t):
             x1=coord[1]
             y1=coord[0]
@@ -142,12 +156,11 @@ while(True):
             #cv2.putText(new,str(i),(x1,y1),cv2.FONT_HERSHEY_SIMPLEX,0.2,(0,255,0))
             d=skin.euclid(np.array([x1, y1]), np.array([x2, y2]))
             if d<25:
-                cv2.arrowedLine(new, (x2, y2), (x1, y1), (0, 255, 0), thickness=1)
-        #show user the imagesS
-        cv2.imshow('spots', new)
-        cv2.imshow('binary', im)
-        cv2.imshow('unprocessed', skin.getFrame())
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+                cv2.arrowedLine(new, (x2, y2), (x1, y1), (0, 255, 0), thickness=1)#"""
+    #show user the imagesS
+    cv2.imshow('spots', new)
+    cv2.imshow('unprocessed', skin.getFrame())
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 skin.close()
 cv2.destroyAllWindows()
