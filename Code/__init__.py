@@ -4,11 +4,21 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 
 class Skin: #skin object for detecting movement
-    def __init__(self,device=1):
-        self.vid = cv2.VideoCapture(device)
+    def __init__(self,device=1,videoFile=""):
+        if videoFile=="": self.cap = cv2.VideoCapture(self.vid)
+        else: self.cap = cv2.VideoCapture(videoFile)
+        self.vid=videoFile
         self.centre=np.array(self.getFrame().shape[0:-1])//2
+        self.origin=self.zero()
+        self.last=self.origin.copy()
+        self.thetas=np.zeros_like(self.last) #store distances
     def getFrame(self): #get a frame from the camera
-        ret, frame = self.vid.read()
+        ret, frame = self.cap.read()
+        if not ret: #reopen
+            self.cap.release()
+            if self.vid=="": self.cap = cv2.VideoCapture(self.vid)
+            else: self.cap = cv2.VideoCapture(self.vid)
+            ret, frame = self.cap.read()
         return frame
     def adaptive(self,img,threshold=150): #get a threshold of pixels that maximizes the blobs
         frame=np.copy(img)
@@ -75,29 +85,64 @@ class Skin: #skin object for detecting movement
         return spots.astype(np.uint8)
     def zero(self,iter=100): #get the best origional image 
         im=self.getBinary()
-        old_T=skin.getDots(im)
+        old_T=self.getDots(im)
         max_t=[]
         for i in range(100):
-            im=skin.getBinary()
-            t=skin.getDots(im)
+            im=self.getBinary()
+            t=self.getDots(im)
             if len(t)>len(max_t):
                 max_t=t.copy()
         return max_t
+    def euclid(self,a,b):
+        return np.sqrt(np.sum((a-b)**2))
+    def movement(self,new,MAXD=15):
+        arrayA=new.copy()
+        arrayB=self.last.copy()
+        looped=np.zeros_like(arrayB)
+        if len(new)>2: #check coords exiat
+            used=[]
+            for i, eachPoint in enumerate(arrayB): #loop through distances and pair off
+                distances=np.sqrt(np.sum(eachPoint-arrayA,axis=1)**2)
+                min_dist=np.argmin(distances)
+                ind=np.argmin(distances)
+                if distances[min_dist]<MAXD and ind not in used: #make sure within parameters
+                    looped[i]=arrayA[ind]
+                    used.append(ind)
+            for i, eachPoint in enumerate(arrayB): #fill in gaps
+                if np.sum(looped[i])==0:
+                    looped[i]=eachPoint
+            self.last=looped.copy()
+            return looped
+        else:
+            return arrayB
     def close(self):
         self.vid.release()
-        
-skin=Skin()
 
+
+skin=Skin(videoFile="C:/Users/dexte/github/Chaos-Robotics/movement.avi")
 frame=skin.getFrame()
-old_T=skin.zero()
+old_T=skin.origin
+new=np.zeros_like(frame)
 
 while(True):
     im=skin.getBinary()
-    t=skin.getDots(im)
-    new=np.zeros_like(frame)
-    if t.shape[0]>2:
+    t_=skin.getDots(im)
+    t=skin.movement(t_)
+    if t_.shape[0]>2:
+        new=np.zeros_like(frame)
         new[t[:,0],t[:,1]]=(0,255,0)
+        new[t_[:,0],t_[:,1]]=(0,0,255)
         new[old_T[:,0],old_T[:,1]]=(255,0,255)
+        for i,coord in enumerate(t):
+            x1=coord[1]
+            y1=coord[0]
+            x2=old_T[i][1]
+            y2=old_T[i][0]
+            cv2.putText(new,str(i),(x1,y1),cv2.FONT_HERSHEY_SIMPLEX,0.2,(0,255,0))
+            d=skin.euclid(np.array([x1, y1]), np.array([x2, y2]))
+            if d<50:
+                cv2.line(new, (x1, y1), (x2, y2), (0, 255, 0), thickness=1)
+                pass
     #show user the imagesS
     cv2.imshow('spots', new)
     cv2.imshow('binary', im)
