@@ -41,5 +41,7 @@ Superglue
 
 Silicone lubricant spray
 
+Camera - wide angle lens usb camera from amazon
+
 
 ## Using the library
