@@ -12,7 +12,7 @@ The camera was mounted onto a custom 3D printed part that connected to a repurpo
 
 <img src="Assets/images/mounting the ring.png" width="50%">
 
-The skins produced through silicone within a <a href="">3D printed plastic mould</a>. This mould was measured to fit the silicone inside a thin layer, with small holes in to create the tips that would later be painted white.
+The skins produced through silicone within a <a href="https://github.com/shepai/RoboSkin/blob/main/Assets/3D%20files/Skin/MouldTIp.stl">3D printed plastic mould</a>. This mould was measured to fit the silicone inside a thin layer, with small holes in to create the tips that would later be painted white.
 
 <img src="Assets/images/RENDER.png" width="50%">
 
@@ -25,6 +25,21 @@ After drying we poured a clear silicone gel into the tactip and left to set in a
 
 
 ### parts list
-You will need access to 3D printing, an oven and laser cutting. 
+You will need access to 3D printing, an oven and laser cutting. The softrobotics toolkit has a better part list for the construction of the TacTip. 
+
+The mould for the tactip required an industrial 3D printer for accuracies for 1mm diameter holes. 
+
+The silicone used:
+Skin - 1:1 mix
+Gel - RTV27905 silicone gel
+
+Paint - high viscosity acrylic white paint off Amazon
+
+Lens - lasercut plastic
+
+Superglue 
+
+Silicone lubricant spray
+
 
 ## Using the library
