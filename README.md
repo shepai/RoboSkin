@@ -12,7 +12,7 @@ The camera was mounted onto a custom 3D printed part that connected to a repurpo
 
 <img src="Assets/images/mounting the ring.png" width="50%">
 
-The skins produced through silicone within a 3D printed plastic mould. This mould was measured to fit the silicone inside a thin layer, with small holes in to create the tips that would later be painted white.
+The skins produced through silicone within a <a href="">3D printed plastic mould</a>. This mould was measured to fit the silicone inside a thin layer, with small holes in to create the tips that would later be painted white.
 
 <img src="Assets/images/RENDER.png" width="50%">
 
