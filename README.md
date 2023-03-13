@@ -10,9 +10,12 @@ The <a href="https://softroboticstoolkit.com/tactip">TacTip</a>, developed from 
 
 The camera was mounted onto a custom 3D printed part that connected to a repurposed USB wide angle lens webcam. The webcam had the circular vision in the centre, which would need cropping at a later stage. The power of the LED ring was connected to the power of the USB camera.  
 
-<img src="Assets/images/mounting the ring.png">
-<img src="Assets/images/RENDER.png">
+<img src="Assets/images/mounting the ring.png" width="50%">
+
 The skins produced through silicone within a 3D printed plastic mould. This mould was measured to fit the silicone inside a thin layer, with small holes in to create the tips that would later be painted white.
+
+<img src="Assets/images/RENDER.png" width="50%">
+
 
 Silicone was made and dyed black to prevent light interference. After being poured into the mould and left for twenty-four hours, a solid yet flexible tactip was produced. The The mould required a lubricant spray over to prevent the tips getting pulled off. To paint the tips we used a thin layer of plastic sheet with an acrylic paint. The tip was turned inside out (so the tips were on the exterioir) and gently dabbed over the paint.  
 
