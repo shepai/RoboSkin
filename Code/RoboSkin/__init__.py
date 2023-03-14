@@ -129,36 +129,49 @@ class Skin: #skin object for detecting movement
             return looped
         else:
             return arrayB
+    def getForce(self,im,gridSize):
+        #get dots and cut up averages of squares to get overall force
+        t=self.getDots(im)
+        image=np.zeros_like(im)
+        x=im.shape[1]
+        y=im.shape[0]
+        x_div=x//gridSize
+        y_div=y//gridSize
+        GRID=np.zeros((gridSize,gridSize,2))
+        if len(t)>2:
+            for c,i in enumerate(range(0,x,x_div)): #loop through grid space
+                for d,j in enumerate(range(0,y,y_div)):
+                    found=t[np.where(np.logical_and(t[:,0]>i,t[:,0]<i+x_div))]
+                    found=found[np.where(np.logical_and(found[:,1]>j,found[:,1]<j+y_div))]  
+                    o_found=self.origin[np.where(np.logical_and(self.origin[:,0]>i,self.origin[:,0]<i+x_div))]
+                    o_found=o_found[np.where(np.logical_and(o_found[:,1]>j,o_found[:,1]<j+y_div))]  
+                    if len(found)!=0:
+                        mag=np.sum(found,axis=0)//len(found) #get magnitude of point
+                        o_mag=np.sum(o_found,axis=0)//len(o_found) #get magnitude of origin
+                        GRID[c][d]=mag
+                        image[j:j+y_div,i:i+x_div]=self.euclid(mag,o_mag) #get intensity of movement
+        return GRID.astype(int),image
+        #t=self.movement(t_)
     def close(self):
         self.vid.release()
-
 
 skin=Skin(videoFile="C:/Users/dexte/github/Chaos-Robotics/movement.avi")
 frame=skin.getFrame()
 old_T=skin.origin
 new=np.zeros_like(frame)
 
+SPLIT=10
+
 
 while(True):
     im=skin.getBinary()
-    new=np.zeros_like(frame)
-    t_=skin.getDots(im)
-    t=skin.movement(t_)
-    if t.shape[0]>2:
-        #new[t[:,0],t[:,1]]=(255,0,0)
-        #new[t_[:,0],t_[:,1]]=(0,0,255)
-        #new[old_T[:,0],old_T[:,1]]=(255,0,255)
-        for i,coord in enumerate(t):
-            x1=coord[1]
-            y1=coord[0]
-            x2=old_T[i][1]
-            y2=old_T[i][0]
-            #cv2.putText(new,str(i),(x1,y1),cv2.FONT_HERSHEY_SIMPLEX,0.2,(0,255,0))
-            d=skin.euclid(np.array([x1, y1]), np.array([x2, y2]))
-            if d<25:
-                cv2.arrowedLine(new, (x2, y2), (x1, y1), (0, 255, 0), thickness=1)#"""
     #show user the imagesS
+    grid,NEW=skin.getForce(im,SPLIT)
+    grid=grid.reshape(SPLIT**2,2)
+    new=np.zeros_like(frame)
+    new[grid[:,0],grid[:,1]]=(0,0,255)
     cv2.imshow('spots', new)
+    cv2.imshow('pressure', NEW)
     cv2.imshow('unprocessed', skin.getFrame())
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
