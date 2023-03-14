@@ -149,7 +149,7 @@ class Skin: #skin object for detecting movement
                         mag=np.sum(found,axis=0)//len(found) #get magnitude of point
                         o_mag=np.sum(o_found,axis=0)//len(o_found) #get magnitude of origin
                         GRID[c][d]=mag
-                        image[j:j+y_div,i:i+x_div]=self.euclid(mag,o_mag) #get intensity of movement
+                        image[j:j+y_div,i:i+x_div]=min(self.euclid(mag,o_mag)*2,255) #get intensity of movement
         return GRID.astype(int),image
         #t=self.movement(t_)
     def close(self):
@@ -160,7 +160,7 @@ frame=skin.getFrame()
 old_T=skin.origin
 new=np.zeros_like(frame)
 
-SPLIT=10
+SPLIT=20
 
 
 while(True):
@@ -170,6 +170,13 @@ while(True):
     grid=grid.reshape(SPLIT**2,2)
     new=np.zeros_like(frame)
     new[grid[:,0],grid[:,1]]=(0,0,255)
+    """for i in range(0,len(grid),3):
+        for j in range(0,len(grid),3):
+            d=skin.euclid(grid[i], grid[j])
+            if i!=j and d<150:
+                cv2.line(new, (grid[i][1],grid[i][0]), (grid[j][1],grid[j][0]), (0, 255, 0), thickness=1)"""
+                
+
     cv2.imshow('spots', new)
     cv2.imshow('pressure', NEW)
     cv2.imshow('unprocessed', skin.getFrame())
