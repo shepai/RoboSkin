@@ -141,10 +141,10 @@ class Skin: #skin object for detecting movement
         if len(t)>2:
             for c,i in enumerate(range(0,x,x_div)): #loop through grid space
                 for d,j in enumerate(range(0,y,y_div)):
-                    found=t[np.where(np.logical_and(t[:,0]>i,t[:,0]<i+x_div))]
-                    found=found[np.where(np.logical_and(found[:,1]>j,found[:,1]<j+y_div))]  
-                    o_found=self.origin[np.where(np.logical_and(self.origin[:,0]>i,self.origin[:,0]<i+x_div))]
-                    o_found=o_found[np.where(np.logical_and(o_found[:,1]>j,o_found[:,1]<j+y_div))]  
+                    found=t[np.where(np.logical_and(t[:,0]>j,t[:,0]<j+y_div))]
+                    found=found[np.where(np.logical_and(found[:,1]>i,found[:,1]<i+x_div))]  
+                    o_found=self.origin[np.where(np.logical_and(self.origin[:,0]>j,self.origin[:,0]<j+y_div))]
+                    o_found=o_found[np.where(np.logical_and(o_found[:,1]>i,o_found[:,1]<i+x_div))]  
                     if len(found)!=0:
                         mag=np.sum(found,axis=0)//len(found) #get magnitude of point
                         o_mag=np.sum(o_found,axis=0)//len(o_found) #get magnitude of origin
@@ -176,7 +176,6 @@ while(True):
             if i!=j and d<150:
                 cv2.line(new, (grid[i][1],grid[i][0]), (grid[j][1],grid[j][0]), (0, 255, 0), thickness=1)"""
                 
-
     cv2.imshow('spots', new)
     cv2.imshow('pressure', NEW)
     cv2.imshow('unprocessed', skin.getFrame())
