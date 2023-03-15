@@ -3,10 +3,28 @@ import numpy as np
 from scipy import ndimage
 import matplotlib.pyplot as plt
 
+class camera360: #class for interfacing with a homemade 360 camera
+    def __init__(self,device1=1,device2=2):
+        self.cap1 = cv2.VideoCapture(device1)
+        self.cap2 = cv2.VideoCapture(device2)
+    def read(self):
+        reta, frame1 = self.cap1.read()
+        retb, frame2 = self.cap2.read()
+        if reta and retb:
+            im=np.concatenate((frame1,frame2),axis=1)
+            return True,im
+        return False, None
+    def release(self):
+        self.cap1.release()
+        self.cap2.release()
+        
 class Skin: #skin object for detecting movement
     def __init__(self,device=1,videoFile=""):
-        if videoFile=="": self.cap = cv2.VideoCapture(device)
+        #set up correct camera/ video component
+        if type(device)==type(camera360()): self.cap=device
+        elif videoFile=="": self.cap = cv2.VideoCapture(device)
         else: self.cap = cv2.VideoCapture(videoFile)
+        
         self.vid=videoFile
         self.centre=np.array(self.getFrame().shape[0:-1])//2
         self.origin=self.zero()
@@ -172,6 +190,14 @@ class Skin: #skin object for detecting movement
     def close(self):
         self.vid.release()
 
+skin=Skin(device=camera360()) #videoFile=path+"Movement2.avi"
+while(True):
+    frame=skin.getFrame()
+    cv2.imshow('unprocessed', frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+skin.close()
+cv2.destroyAllWindows()
 #C:/Users/dexte/github/Chaos-Robotics/Bio-inspired sensors/Tactip/Vid/Movement.mp4
 #C:/Users/dexte/github/Chaos-Robotics/movement.avi
 """
