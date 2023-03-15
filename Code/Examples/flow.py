@@ -1,9 +1,11 @@
 import cv2
 import letRun #This library can be deleted, it is used for debugging
-import RoboSkin as Skin
+import RoboSkin as sk
 import numpy as np
 
-skin=Skin(videoFile="C:/Users/dexte/github/Chaos-Robotics/movement.avi")
+path="C:/Users/dexte/github/RoboSkin/Assets/Video demos/"
+#videoFile=path+"Movement2.avi"
+skin=sk.Skin(videoFile=path+"Movement3.avi")
 frame=skin.getFrame()
 old_T=skin.origin
 new=np.zeros_like(frame)

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 class Skin: #skin object for detecting movement
     def __init__(self,device=1,videoFile=""):
-        if videoFile=="": self.cap = cv2.VideoCapture(self.vid)
+        if videoFile=="": self.cap = cv2.VideoCapture(device)
         else: self.cap = cv2.VideoCapture(videoFile)
         self.vid=videoFile
         self.centre=np.array(self.getFrame().shape[0:-1])//2
@@ -174,11 +174,11 @@ class Skin: #skin object for detecting movement
 
 #C:/Users/dexte/github/Chaos-Robotics/Bio-inspired sensors/Tactip/Vid/Movement.mp4
 #C:/Users/dexte/github/Chaos-Robotics/movement.avi
+"""
 path="C:/Users/dexte/github/RoboSkin/Assets/Video demos/"
 
-skin=Skin(videoFile=path+"Movement2.avi")
+skin=Skin(videoFile=path+"Movement3.avi") #videoFile=path+"Movement2.avi"
 frame=skin.getFrame()
-print(frame.shape)
 old_T=skin.origin
 new=np.zeros_like(frame)
 
@@ -192,18 +192,24 @@ while(True):
     grid=grid.reshape(SPLIT**2,2)
     new=np.zeros_like(frame)
     new[grid[:,0],grid[:,1]]=(0,0,255)
-    """for i in range(0,len(grid),3):
+    
+    for i in range(0,len(grid),3):
         for j in range(0,len(grid),3):
             d=skin.euclid(grid[i], grid[j])
             if i!=j and d<150:
-                cv2.line(new, (grid[i][1],grid[i][0]), (grid[j][1],grid[j][0]), (0, 255, 0), thickness=1)"""
+                cv2.line(new, (grid[i][1],grid[i][0]), (grid[j][1],grid[j][0]), (0, 255, 0), thickness=1)
     push=skin.getSizeForce(im,SPLIT)
+    tactile=np.zeros_like(new)
+    tactile[:,:,2]=push
+    tactile[:,:,0]=NEW
     cv2.imshow('spots', new)
-    cv2.imshow('pressure', NEW)
-    cv2.imshow('push',push)
+    #cv2.imshow('pressure', NEW)
+    #cv2.imshow('push',push)
+    cv2.imshow('tactile',tactile)
     cv2.imshow('binary',im)
     cv2.imshow('unprocessed', skin.getFrame())
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 skin.close()
 cv2.destroyAllWindows()
+"""
