@@ -19,6 +19,9 @@ class Skin: #skin object for detecting movement
             if self.vid=="": self.cap = cv2.VideoCapture(self.vid)
             else: self.cap = cv2.VideoCapture(self.vid)
             ret, frame = self.cap.read()
+        if frame.shape[0]>500: #do not allow too large
+            SF=480/frame.shape[0]
+            frame = cv2.resize(frame, (int(frame.shape[1]*SF),480), interpolation = cv2.INTER_AREA)
         return frame
     def adaptive(self,img,threshold=150): #get a threshold of pixels that maximizes the blobs
         frame=np.copy(img)
@@ -155,8 +158,12 @@ class Skin: #skin object for detecting movement
     def close(self):
         self.vid.release()
 
+#C:/Users/dexte/github/Chaos-Robotics/Bio-inspired sensors/Tactip/Vid/Movement.mp4
+#C:/Users/dexte/github/Chaos-Robotics/movement.avi
+
 skin=Skin(videoFile="C:/Users/dexte/github/Chaos-Robotics/movement.avi")
 frame=skin.getFrame()
+print(frame.shape)
 old_T=skin.origin
 new=np.zeros_like(frame)
 
@@ -175,7 +182,7 @@ while(True):
             d=skin.euclid(grid[i], grid[j])
             if i!=j and d<150:
                 cv2.line(new, (grid[i][1],grid[i][0]), (grid[j][1],grid[j][0]), (0, 255, 0), thickness=1)"""
-                
+    
     cv2.imshow('spots', new)
     cv2.imshow('pressure', NEW)
     cv2.imshow('unprocessed', skin.getFrame())
