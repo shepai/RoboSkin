@@ -5,7 +5,7 @@ import numpy as np
 
 path="C:/Users/dexte/github/RoboSkin/Assets/Video demos/"
 #videoFile=path+"Movement2.avi"
-skin=sk.Skin(videoFile=path+"Movement3.avi")
+skin=sk.Skin(videoFile=path+"Movement1.mp4")
 frame=skin.getFrame()
 old_T=skin.origin
 new=np.zeros_like(frame)
