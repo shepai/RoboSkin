@@ -132,7 +132,7 @@ class Skin: #skin object for detecting movement
             return looped
         else:
             return arrayB
-    def getForce(self,im,gridSize):
+    def getForce(self,im,gridSize,threshold=30):
         #get dots and cut up averages of squares to get overall force
         t=self.getDots(im)
         image=np.zeros_like(im)
@@ -152,22 +152,37 @@ class Skin: #skin object for detecting movement
                         mag=np.sum(found,axis=0)//len(found) #get magnitude of point
                         o_mag=np.sum(o_found,axis=0)//len(o_found) #get magnitude of origin
                         GRID[c][d]=mag
-                        image[j:j+y_div,i:i+x_div]=min(self.euclid(mag,o_mag)*2,255) #get intensity of movement
+                        val=min(self.euclid(mag,o_mag)*2,255)
+                        if val>threshold: image[j:j+y_div,i:i+x_div]=val #get intensity of movement
         return GRID.astype(int),image
         #t=self.movement(t_)
+    def getSizeForce(self,im,gridSize,threshold=30):
+        image=np.zeros_like(im)
+        x=im.shape[1]
+        y=im.shape[0]
+        x_div=x//gridSize
+        y_div=y//gridSize
+        average=np.average(im)
+        for c,i in enumerate(range(0,x,x_div)): #loop through grid space
+            for d,j in enumerate(range(0,y,y_div)):
+                    val=max(np.average(im[j:j+y_div,i:i+x_div])-average,0) 
+                    if val>threshold:
+                        image[j:j+y_div,i:i+x_div]=val#get intensity of movement
+        return image
     def close(self):
         self.vid.release()
 
 #C:/Users/dexte/github/Chaos-Robotics/Bio-inspired sensors/Tactip/Vid/Movement.mp4
 #C:/Users/dexte/github/Chaos-Robotics/movement.avi
+path="C:/Users/dexte/github/RoboSkin/Assets/Video demos/"
 
-skin=Skin(videoFile="C:/Users/dexte/github/Chaos-Robotics/movement.avi")
+skin=Skin(videoFile=path+"Movement2.avi")
 frame=skin.getFrame()
 print(frame.shape)
 old_T=skin.origin
 new=np.zeros_like(frame)
 
-SPLIT=20
+SPLIT=10
 
 
 while(True):
@@ -182,9 +197,11 @@ while(True):
             d=skin.euclid(grid[i], grid[j])
             if i!=j and d<150:
                 cv2.line(new, (grid[i][1],grid[i][0]), (grid[j][1],grid[j][0]), (0, 255, 0), thickness=1)"""
-    
+    push=skin.getSizeForce(im,SPLIT)
     cv2.imshow('spots', new)
     cv2.imshow('pressure', NEW)
+    cv2.imshow('push',push)
+    cv2.imshow('binary',im)
     cv2.imshow('unprocessed', skin.getFrame())
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
