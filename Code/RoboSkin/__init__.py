@@ -1,3 +1,13 @@
+"""
+This library is for interfacing with tactile sensors such as the TacTip. 
+You can use the dataset in Assets/Video demos or you can use a physical tactile sensor with a usb webcam. 
+
+Code by Dexter R. Shepherd
+PhD student at the University of Sussex
+https://profiles.sussex.ac.uk/p493975-dexter-shepherd
+
+"""
+
 import cv2
 import numpy as np
 from scipy import ndimage
@@ -6,10 +16,18 @@ import matplotlib.pyplot as plt
 
 class camera360: #class for interfacing with a homemade 360 camera
     def __init__(self,device1=1,device2=2,ignore=False):
+        """
+        @param device1 id for camera 1
+        @param device2 id for camera 2
+        @param ignore stops attempt of connection when checking if the camera is real or not
+        """
         if not ignore:
             self.cap1 = cv2.VideoCapture(device1)
             self.cap2 = cv2.VideoCapture(device2)
     def read(self):
+        """
+        read the devices and stitch them together
+        """
         reta, frame1 = self.cap1.read()
         retb, frame2 = self.cap2.read()
         if reta and retb:
@@ -17,21 +35,30 @@ class camera360: #class for interfacing with a homemade 360 camera
             return True,im
         return False, None
     def release(self):
+        """
+        release the devices
+        """
         self.cap1.release()
         self.cap2.release()
         
 class Skin: #skin object for detecting movement
     def __init__(self,device=1,videoFile=""):
-        #set up correct camera/ video component
+        """
+        set up correct camera/ video component
+        set up all variables for optic flow and establish a baseline
+        @param device selects which camera to take from
+        @param videoFile points to a file to use instead of the camera
+        """
         if type(device)==type(camera360(ignore=True)): self.cap=device
         elif videoFile=="": self.cap = cv2.VideoCapture(device)
         else: self.cap = cv2.VideoCapture(videoFile)
         
-        self.vid=videoFile
-        self.centre=np.array(self.getFrame().shape[0:-1])//2
-        self.origin=self.zero()
+        self.vid=videoFile #save viceo file
+        self.centre=np.array(self.getFrame().shape[0:-1])//2 #get centre of frame
+        self.origin=self.zero() #establish baseline
         self.last=self.origin.copy()
         self.thetas=np.zeros_like(self.last) #store distances
+        #optical flow parameters:
         feature_params = dict( maxCorners = 100,
                        qualityLevel = 0.1,
                        minDistance = 7,
@@ -45,18 +72,27 @@ class Skin: #skin object for detecting movement
         self.good_new=[]
         self.good_old=[]
         self.p0 = cv2.goodFeaturesToTrack(past, mask = None, **feature_params)
-    def getFrame(self): #get a frame from the camera
+    def getFrame(self):
+        """
+        get a frame from the camera
+        """
         ret, frame = self.cap.read()
-        if not ret: #reopen
+        if not ret: #reopen if closed
             self.cap.release()
             if self.vid=="": self.cap = cv2.VideoCapture(self.vid)
             else: self.cap = cv2.VideoCapture(self.vid)
             ret, frame = self.cap.read()
+            assert ret==True,"Error, camera or video file not existant"
         if frame.shape[0]>500: #do not allow too large
             SF=480/frame.shape[0]
             frame = cv2.resize(frame, (int(frame.shape[1]*SF),480), interpolation = cv2.INTER_AREA)
         return frame
-    def adaptive(self,img,threshold=150): #get a threshold of pixels that maximizes the blobs
+    def adaptive(self,img,threshold=150):
+        """
+        get a threshold of pixels that maximizes the blobs
+        @param img
+        @param threshold starts the binary threshold at this value and increases or decreases
+        """
         frame=np.copy(img)
         sum=0
         while sum<22000000: #loop till large picel value found
@@ -70,6 +106,10 @@ class Skin: #skin object for detecting movement
         frame[frame<=threshold]=0
         return frame
     def removeBlob(self,im,min_size = 300):
+        """
+        @param im
+        @param min_size defins the minimum size of the blobs otherwise delete them
+        """
         nb_blobs, im_with_separated_blobs, stats, _ = cv2.connectedComponentsWithStats(im)
         sizes = stats[:, -1]
         sizes = sizes[1:]
@@ -88,7 +128,10 @@ class Skin: #skin object for detecting movement
         return im_result_with,im_result
 
     def get_processed(self,frame):
-        #make gray and preprocess the binary threshold
+        """
+        make gray and preprocess the binary threshold
+        @param frame
+        """
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         frame_gray=self.adaptive(frame_gray)
         #remove the blobs
@@ -102,6 +145,10 @@ class Skin: #skin object for detecting movement
         frame[inds[:,0],inds[:,1]]=[255,255,255]
         return frame
     def getDots(self,gray):
+        """
+        return the centroud positions of all the points within the binary image
+        @param gray
+        """
         labels, nlabels = ndimage.label(gray)
         t = ndimage.center_of_mass(gray, labels, np.arange(nlabels) + 1 )
         t=np.array(t)
@@ -114,24 +161,47 @@ class Skin: #skin object for detecting movement
         t=np.array(temp)
         return t
     def getBinary(self):
+        """
+        get the binary image from the sensor and return only the white dots (filter out glare)
+        """
         image=self.getFrame()
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         binary=self.adaptive(gray)
         to_Show,spots=self.removeBlob(binary)
         return spots.astype(np.uint8)
-    def zero(self,iter=50): #get the best origional image 
+    def zero(self,iter=50):
+        """
+        get the best original image by maximizing the number of pixels
+        @param iter is how many iterations it will make an average on
+        """
         im=self.getBinary()
         old_T=self.getDots(im)
         max_t=[]
-        for i in range(100):
+        for i in range(iter):
             im=self.getBinary()
             t=self.getDots(im)
             if len(t)>len(max_t):
                 max_t=t.copy()
         return max_t
     def euclid(self,a,b,axis=None):
+        """
+        calculate the euclid distance
+        @param a is vectors a
+        @param b is vectors b
+        @axis is the axis you wish to calculate the distance on
+        """
         return np.linalg.norm(a-b,axis=axis)
     def loop_through(self,stored,used,looped,arrayA,arrayB,count,maxL=10):
+        """
+        Recursive method to find the closest points
+        @param stored is the items that have been visited but can be again
+        @param used is the already used indicies
+        @param looped is the big array of point positions
+        @param arrayA is the incoming points
+        @param arrayB is the og points
+        @param count is a counter to preent infinite recusion 
+        @param maxL is the maximum level it will search
+        """
         if count==maxL:
             return looped
         for i, eachPoint in enumerate(arrayB): #loop through distances and pair off
@@ -149,20 +219,19 @@ class Skin: #skin object for detecting movement
                     stored[ind]=[min_dist,i]
                     looped=self.loop_through(stored,used,looped,arrayA,arrayB,count+1,maxL=maxL)
         return looped
-    def getVectors(self,current,old):
-        #t_=self.getDots(current)
-        kernel = np.ones((5, 5), np.uint8)
-        im = cv2.erode(cv2.absdiff(current,old), kernel) 
-        t_=self.getDots(im)
-        return self.movement(t_)
     def movement(self,new,MAXD=10):
+        """
+        detect the movement of points using the new image
+        @param new
+        @param maxD is the maxdepth to search
+        """
         arrayA=new.copy()
         arrayB=self.last.copy()
         if len(new)>2: #check coords exist
             stored=np.zeros_like(arrayA+(2,))
             looped=np.zeros_like(arrayB)
             used=[]
-            looped=self.loop_through(stored,used,looped,arrayA,arrayB,1)
+            looped=self.loop_through(stored,used,looped,arrayA,arrayB,1,maxL=MAXD)
             #TODO experiment with adding the unpicked lowest distances instead of the orginal point
             for i, eachPoint in enumerate(arrayB): #fill in gaps
                 if np.sum(looped[i])==0:
@@ -175,6 +244,11 @@ class Skin: #skin object for detecting movement
         else:
             return arrayB
     def opticFlow(self,past,next):
+        """
+        Calculate the optic flow image
+        @param past image
+        @param next image
+        """
         color = np.random.randint(0, 255, (100, 3))
         p1, st, err = cv2.calcOpticalFlowPyrLK(past, next, self.p0, None, **self.lk_params)
         started=False
@@ -190,10 +264,7 @@ class Skin: #skin object for detecting movement
         for i, (new, old) in enumerate(zip(self.good_new, self.good_old)):
             a, b = new.ravel()
             c, d = old.ravel()
-            #mask = cv.line(mask, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
-            #mask = cv.arrowedLine(mask, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
             if i<len(color):
-                #frame = cv2.circle(frame, (int(a), int(b)), 5, color[i].tolist(), -1)
                 if started:
                     self.begin.append([c, d])
         for i in range(len(self.begin)):
@@ -205,11 +276,23 @@ class Skin: #skin object for detecting movement
         self.p0 = self.good_new.reshape(-1, 1, 2)
         return mask
     def noiseRed(self,t1,t2):
+        """
+        Check whether there is noise between points by ratio of average to std
+        @param t1 points
+        @param t2 points
+        """
         average=self.euclid(t1,t2)/len(t1)
         std=np.sqrt((self.euclid(t1**2,t2**2)/len(t1))-(average**2))
         return average/max(std,0.1)
     def getForce(self,im,past,gridSize,threshold=40):
-        im=cv2.absdiff(im,past)
+        """
+        Get the total force acting on different areas
+        @param im image
+        @param past image
+        @param gridSize is how many segments to device the image (gridSizexgridSize)
+        @param threshold ignores anything below
+        """
+        im=cv2.absdiff(im,past) #get the difference between images
         image=np.zeros_like(im)
         x=im.shape[1]
         y=im.shape[0]
@@ -225,11 +308,14 @@ class Skin: #skin object for detecting movement
                     if val!=0: #calculate average of filled in points
                         average+=val
                         num+=1
-        image=image-(average//num) #subtract the lisght average
+        image=image-(average//num) #subtract the light average
         image[image<0]=0
         return image
     def close(self):
-        self.vid.release()
+        """
+        close the camera/s
+        """
+        self.cap.release()
 
 #C:/Users/dexte/github/Chaos-Robotics/Bio-inspired sensors/Tactip/Vid/Movement.mp4
 #C:/Users/dexte/github/Chaos-Robotics/movement.avi
