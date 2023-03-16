@@ -3,10 +3,12 @@ import numpy as np
 from scipy import ndimage
 import matplotlib.pyplot as plt
 
+
 class camera360: #class for interfacing with a homemade 360 camera
-    def __init__(self,device1=1,device2=2):
-        self.cap1 = cv2.VideoCapture(device1)
-        self.cap2 = cv2.VideoCapture(device2)
+    def __init__(self,device1=1,device2=2,ignore=False):
+        if not ignore:
+            self.cap1 = cv2.VideoCapture(device1)
+            self.cap2 = cv2.VideoCapture(device2)
     def read(self):
         reta, frame1 = self.cap1.read()
         retb, frame2 = self.cap2.read()
@@ -21,7 +23,7 @@ class camera360: #class for interfacing with a homemade 360 camera
 class Skin: #skin object for detecting movement
     def __init__(self,device=1,videoFile=""):
         #set up correct camera/ video component
-        if type(device)==type(camera360()): self.cap=device
+        if type(device)==type(camera360(ignore=True)): self.cap=device
         elif videoFile=="": self.cap = cv2.VideoCapture(device)
         else: self.cap = cv2.VideoCapture(videoFile)
         
@@ -44,7 +46,7 @@ class Skin: #skin object for detecting movement
     def adaptive(self,img,threshold=150): #get a threshold of pixels that maximizes the blobs
         frame=np.copy(img)
         sum=0
-        while sum<21000000: #loop till large picel value found
+        while sum<22000000: #loop till large picel value found
             frame[frame>threshold]=255
             frame[frame<=threshold]=0
             sum=np.sum(frame)
@@ -54,7 +56,7 @@ class Skin: #skin object for detecting movement
         frame[frame>threshold]=255
         frame[frame<=threshold]=0
         return frame
-    def removeBlob(self,im,min_size = 270):
+    def removeBlob(self,im,min_size = 300):
         nb_blobs, im_with_separated_blobs, stats, _ = cv2.connectedComponentsWithStats(im)
         sizes = stats[:, -1]
         sizes = sizes[1:]
@@ -104,7 +106,7 @@ class Skin: #skin object for detecting movement
         binary=self.adaptive(gray)
         to_Show,spots=self.removeBlob(binary)
         return spots.astype(np.uint8)
-    def zero(self,iter=100): #get the best origional image 
+    def zero(self,iter=50): #get the best origional image 
         im=self.getBinary()
         old_T=self.getDots(im)
         max_t=[]
@@ -134,6 +136,12 @@ class Skin: #skin object for detecting movement
                     stored[ind]=[min_dist,i]
                     looped=self.loop_through(stored,used,looped,arrayA,arrayB,count+1,maxL=maxL)
         return looped
+    def getVectors(self,current,old):
+        #t_=self.getDots(current)
+        kernel = np.ones((5, 5), np.uint8)
+        im = cv2.erode(cv2.absdiff(current,old), kernel) 
+        t_=self.getDots(im)
+        return self.movement(t_)
     def movement(self,new,MAXD=10):
         arrayA=new.copy()
         arrayB=self.last.copy()
@@ -150,54 +158,30 @@ class Skin: #skin object for detecting movement
             return looped
         else:
             return arrayB
-    def getForce(self,im,gridSize,threshold=30):
-        #get dots and cut up averages of squares to get overall force
-        t=self.getDots(im)
-        image=np.zeros_like(im)
-        x=im.shape[1]
-        y=im.shape[0]
-        x_div=x//gridSize
-        y_div=y//gridSize
-        GRID=np.zeros((gridSize,gridSize,2))
-        if len(t)>2:
-            for c,i in enumerate(range(0,x,x_div)): #loop through grid space
-                for d,j in enumerate(range(0,y,y_div)):
-                    found=t[np.where(np.logical_and(t[:,0]>j,t[:,0]<j+y_div))]
-                    found=found[np.where(np.logical_and(found[:,1]>i,found[:,1]<i+x_div))]  
-                    o_found=self.origin[np.where(np.logical_and(self.origin[:,0]>j,self.origin[:,0]<j+y_div))]
-                    o_found=o_found[np.where(np.logical_and(o_found[:,1]>i,o_found[:,1]<i+x_div))]  
-                    if len(found)!=0:
-                        mag=np.sum(found,axis=0)//len(found) #get magnitude of point
-                        o_mag=np.sum(o_found,axis=0)//len(o_found) #get magnitude of origin
-                        GRID[c][d]=mag
-                        val=min(self.euclid(mag,o_mag)*2,255)
-                        if val>threshold: image[j:j+y_div,i:i+x_div]=val #get intensity of movement
-        return GRID.astype(int),image
         #t=self.movement(t_)
-    def getSizeForce(self,im,gridSize,threshold=30):
+    def getForce(self,im,past,gridSize,threshold=40):
+        im=cv2.absdiff(im,past)
         image=np.zeros_like(im)
         x=im.shape[1]
         y=im.shape[0]
         x_div=x//gridSize
         y_div=y//gridSize
-        average=np.average(im)
+        average=0
+        num=0
         for c,i in enumerate(range(0,x,x_div)): #loop through grid space
             for d,j in enumerate(range(0,y,y_div)):
-                    val=max(np.average(im[j:j+y_div,i:i+x_div])-average,0) 
+                    val=np.average(im[j:j+y_div,i:i+x_div])
                     if val>threshold:
                         image[j:j+y_div,i:i+x_div]=val#get intensity of movement
+                    if val!=0: #calculate average of filled in points
+                        average+=val
+                        num+=1
+        image=image-(average//num) #subtract the lisght average
+        image[image<0]=0
         return image
     def close(self):
         self.vid.release()
 
-skin=Skin(device=camera360()) #videoFile=path+"Movement2.avi"
-while(True):
-    frame=skin.getFrame()
-    cv2.imshow('unprocessed', frame)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-skin.close()
-cv2.destroyAllWindows()
 #C:/Users/dexte/github/Chaos-Robotics/Bio-inspired sensors/Tactip/Vid/Movement.mp4
 #C:/Users/dexte/github/Chaos-Robotics/movement.avi
 """
@@ -238,4 +222,27 @@ while(True):
         break
 skin.close()
 cv2.destroyAllWindows()
+def getForce(self,im,gridSize,threshold=30):
+        #get dots and cut up averages of squares to get overall force
+        t=self.getDots(im)
+        image=np.zeros_like(im)
+        x=im.shape[1]
+        y=im.shape[0]
+        x_div=x//gridSize
+        y_div=y//gridSize
+        GRID=np.zeros((gridSize,gridSize,2))
+        if len(t)>2:
+            for c,i in enumerate(range(0,x,x_div)): #loop through grid space
+                for d,j in enumerate(range(0,y,y_div)):
+                    found=t[np.where(np.logical_and(t[:,0]>j,t[:,0]<j+y_div))]
+                    found=found[np.where(np.logical_and(found[:,1]>i,found[:,1]<i+x_div))]  
+                    o_found=self.origin[np.where(np.logical_and(self.origin[:,0]>j,self.origin[:,0]<j+y_div))]
+                    o_found=o_found[np.where(np.logical_and(o_found[:,1]>i,o_found[:,1]<i+x_div))]  
+                    if len(found)!=0:
+                        mag=np.sum(found,axis=0)//len(found) #get magnitude of point
+                        o_mag=np.sum(o_found,axis=0)//len(o_found) #get magnitude of origin
+                        GRID[c][d]=mag
+                        val=min(self.euclid(mag,o_mag)*2,255)
+                        if val>threshold: image[j:j+y_div,i:i+x_div]=val #get intensity of movement
+        return GRID.astype(int),image
 """
