@@ -32,6 +32,19 @@ class Skin: #skin object for detecting movement
         self.origin=self.zero()
         self.last=self.origin.copy()
         self.thetas=np.zeros_like(self.last) #store distances
+        feature_params = dict( maxCorners = 100,
+                       qualityLevel = 0.1,
+                       minDistance = 7,
+                       blockSize = 7 )
+        # Parameters for lucas kanade optical flow
+        self.lk_params = dict( winSize  = (15, 15),
+                  maxLevel = 10,
+                  criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.1))
+        past=cv2.cvtColor(self.getFrame(), cv2.COLOR_BGR2GRAY)
+        self.begin=[]
+        self.good_new=[]
+        self.good_old=[]
+        self.p0 = cv2.goodFeaturesToTrack(past, mask = None, **feature_params)
     def getFrame(self): #get a frame from the camera
         ret, frame = self.cap.read()
         if not ret: #reopen
@@ -116,13 +129,13 @@ class Skin: #skin object for detecting movement
             if len(t)>len(max_t):
                 max_t=t.copy()
         return max_t
-    def euclid(self,a,b):
-        return np.sqrt(np.sum((a-b)**2))
+    def euclid(self,a,b,axis=None):
+        return np.linalg.norm(a-b,axis=axis)
     def loop_through(self,stored,used,looped,arrayA,arrayB,count,maxL=10):
         if count==maxL:
             return looped
         for i, eachPoint in enumerate(arrayB): #loop through distances and pair off
-            distances=np.sqrt(np.sum(eachPoint-arrayA,axis=1)**2)
+            distances=self.euclid(eachPoint,arrayA,axis=1)#np.sqrt(np.sum(eachPoint-arrayA,axis=1)**2)
             min_dist=distances[np.argmin(distances)]
             ind=np.argmin(distances)
             if ind not in used: #make sure within parameters
@@ -154,11 +167,47 @@ class Skin: #skin object for detecting movement
             for i, eachPoint in enumerate(arrayB): #fill in gaps
                 if np.sum(looped[i])==0:
                     looped[i]=eachPoint.copy()
-            self.last=looped.copy()
+            if self.noiseRed(arrayB,looped)<0.028: #if insignificant movement
+                return arrayB
+                #self.last=self.origin.copy()
+            #self.last=looped.copy()
             return looped
         else:
             return arrayB
-        #t=self.movement(t_)
+    def opticFlow(self,past,next):
+        color = np.random.randint(0, 255, (100, 3))
+        p1, st, err = cv2.calcOpticalFlowPyrLK(past, next, self.p0, None, **self.lk_params)
+        started=False
+        if p1 is not None:
+            self.good_new = p1[st==1]
+            self.good_old = self.p0[st==1]
+        if len(self.begin)==0: #has not been chosen
+            started=True
+        if len(self.begin)!=len(self.good_new):
+            self.begin=[]
+        started=True
+        mask=np.zeros_like(past)
+        for i, (new, old) in enumerate(zip(self.good_new, self.good_old)):
+            a, b = new.ravel()
+            c, d = old.ravel()
+            #mask = cv.line(mask, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
+            #mask = cv.arrowedLine(mask, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
+            if i<len(color):
+                #frame = cv2.circle(frame, (int(a), int(b)), 5, color[i].tolist(), -1)
+                if started:
+                    self.begin.append([c, d])
+        for i in range(len(self.begin)):
+            if i<len(self.begin) and i<len(self.good_new):
+                vy=self.begin[i][1]-self.good_new[i][1]
+                vx=self.begin[i][0]-self.good_new[i][0]
+                #vectors.append([vx,vy])
+                mask = cv2.arrowedLine(mask, (int(self.begin[i][0]), int(self.begin[i][1])), (int(self.good_new[i][0]), int(self.good_new[i][1])), color[i].tolist(), 2)
+        self.p0 = self.good_new.reshape(-1, 1, 2)
+        return mask
+    def noiseRed(self,t1,t2):
+        average=self.euclid(t1,t2)/len(t1)
+        std=np.sqrt((self.euclid(t1**2,t2**2)/len(t1))-(average**2))
+        return average/max(std,0.1)
     def getForce(self,im,past,gridSize,threshold=40):
         im=cv2.absdiff(im,past)
         image=np.zeros_like(im)
