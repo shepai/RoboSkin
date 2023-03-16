@@ -45,3 +45,17 @@ Camera - wide angle lens usb camera from amazon
 
 
 ## Using the library
+
+To import the library simply
+
+'''
+import RoboSkin as sk
+skin=sk.Skin()
+'''
+
+If you wish to use a virtual tactip check out our dataset within <a>Assets/Video demos</a>. This can be imported via a parameter
+
+'''
+import RoboSkin as sk
+skin=sk.Skin(videoFile=path+"Movement4.avi")
+'''
