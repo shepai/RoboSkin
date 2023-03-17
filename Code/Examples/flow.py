@@ -23,7 +23,7 @@ while(True):
             y1=coord[0]
             x2=old_T[i][1]
             y2=old_T[i][0]
-            cv2.putText(new,str(i),(x1,y1),cv2.FONT_HERSHEY_SIMPLEX,0.2,(0,255,0))
+            #cv2.putText(new,str(i),(x1,y1),cv2.FONT_HERSHEY_SIMPLEX,0.2,(0,255,0))
             #d=skin.euclid(np.array([x1, y1]), np.array([x2, y2]))
             cv2.arrowedLine(new, (x2, y2), (x1, y1), (0, 255, 0), thickness=1)#
     #show user the imagesS
