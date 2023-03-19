@@ -76,4 +76,4 @@ The distance between these points is calculated by the following equation where 
 
 $d(o,t) = \sqrt{\sum_{i=1}^{n}(o_i-t_i)^2}$ 
 
-<img src="Assets/Output demos/movementVector.avi">
+<img src="Assets/images/movementVector.gif">
