@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 from scipy import ndimage
 import matplotlib.pyplot as plt
-
+import copy
 
 class camera360: #class for interfacing with a homemade 360 camera
     def __init__(self,device1=1,device2=2,ignore=False):
@@ -55,6 +55,7 @@ class Skin: #skin object for detecting movement
         
         self.vid=videoFile #save viceo file
         self.centre=np.array(self.getFrame().shape[0:-1])//2 #get centre of frame
+        self.startIm=None
         self.origin=self.zero() #establish baseline
         self.last=self.origin.copy()
         self.thetas=np.zeros_like(self.last) #store distances
@@ -144,19 +145,23 @@ class Skin: #skin object for detecting movement
         inds=np.argwhere(spots == 255)
         frame[inds[:,0],inds[:,1]]=[255,255,255]
         return frame
-    def getDots(self,gray):
+    def getDots(self,gray,size=150,centre=None):
         """
         return the centroud positions of all the points within the binary image
         @param gray
         """
+        if centre==None:centre=self.centre
         labels, nlabels = ndimage.label(gray)
         t = ndimage.center_of_mass(gray, labels, np.arange(nlabels) + 1 )
         t=np.array(t)
         t=np.rint(t).astype(int)
         temp=[]
         for i in range(len(t)):
-            d=np.sqrt(np.sum((self.centre-t[i])**2))
-            if d<150:
+            if type(centre)!=type(0):
+                d=np.sqrt(np.sum((self.centre-t[i])**2))
+                if d<size:
+                    temp.append(t[i])
+            else:
                 temp.append(t[i])
         t=np.array(temp)
         return t
@@ -182,6 +187,7 @@ class Skin: #skin object for detecting movement
             t=self.getDots(im)
             if len(t)>len(max_t):
                 max_t=t.copy()
+                self.startIm=im.copy()
         return max_t
     def euclid(self,a,b,axis=None):
         """
@@ -219,14 +225,15 @@ class Skin: #skin object for detecting movement
                     stored[ind]=[min_dist,i]
                     looped=self.loop_through(stored,used,looped,arrayA,arrayB,count+1,maxL=maxL)
         return looped
-    def movement(self,new,MAXD=10):
+    def movement(self,new,referenceArray=None,MAXD=10):
         """
         detect the movement of points using the new image
         @param new
         @param maxD is the maxdepth to search
         """
+        if type(referenceArray)==type(None): referenceArray=self.last.copy()
         arrayA=new.copy()
-        arrayB=self.last.copy()
+        arrayB=referenceArray.copy()
         if len(new)>2: #check coords exist
             stored=np.zeros_like(arrayA+(2,))
             looped=np.zeros_like(arrayB)
@@ -284,7 +291,7 @@ class Skin: #skin object for detecting movement
         average=self.euclid(t1,t2)/len(t1)
         std=np.sqrt((self.euclid(t1**2,t2**2)/len(t1))-(average**2))
         return average/max(std,0.1)
-    def getForce(self,im,past,gridSize,threshold=40):
+    def getForce(self,im,past,gridSize,threshold=50,image=None,degrade=1):
         """
         Get the total force acting on different areas
         @param im image
@@ -293,7 +300,10 @@ class Skin: #skin object for detecting movement
         @param threshold ignores anything below
         """
         im=cv2.absdiff(im,past) #get the difference between images
-        image=np.zeros_like(im)
+        if type(image)==type(None): image=np.zeros_like(im)
+        else: 
+            image=image-degrade
+            image[image<0]=0
         x=im.shape[1]
         y=im.shape[0]
         x_div=x//gridSize
@@ -304,7 +314,7 @@ class Skin: #skin object for detecting movement
             for d,j in enumerate(range(0,y,y_div)):
                     val=np.average(im[j:j+y_div,i:i+x_div])
                     if val>threshold:
-                        image[j:j+y_div,i:i+x_div]=val#get intensity of movement
+                        image[j:j+y_div,i:i+x_div]=val+150#get intensity of movement
                     if val!=0: #calculate average of filled in points
                         average+=val
                         num+=1
@@ -380,4 +390,45 @@ def getForce(self,im,gridSize,threshold=30):
                         val=min(self.euclid(mag,o_mag)*2,255)
                         if val>threshold: image[j:j+y_div,i:i+x_div]=val #get intensity of movement
         return GRID.astype(int),image
+
+    def getForceA(self,im,gridSize,threshold=30):
+        #get dots and cut up averages of squares to get overall force
+        image=np.zeros_like(im)
+        x=im.shape[1]
+        y=im.shape[0]
+        x_div=x//gridSize
+        y_div=y//gridSize
+        GRID=np.zeros((gridSize,gridSize,1))
+        av=0
+        co=0
+        for c,i in enumerate(range(0,x,x_div)): #loop through grid space
+            for d,j in enumerate(range(0,y,y_div)):
+                croppedN=im[j:j+y_div,i:i+x_div]
+                croppedO=self.startIm[j:j+y_div,i:i+x_div]
+                t1=self.getDots(croppedO,centre=0)
+                t2=self.getDots(croppedN,centre=0)
+                t2=self.movement(t2,referenceArray=t1)
+                if len(t1)>2:
+                    dist=np.sum(self.euclid(t1,t2,axis=0))*10
+                    GRID[c][d]=dist
+                    #image[j:j+y_div,i:i+x_div]=dist
+                    av+=dist
+                    if dist>0: co+=1
+        sub=copy.deepcopy(GRID.flatten())
+        inds=np.zeros_like(sub)
+        shapesotre=GRID.shape
+        GRID=GRID.flatten()
+        GRID=GRID*0
+        n=255//len([inds>0])
+        for i in range(len(inds)//2):
+            val=np.argmax(sub)
+            if sub[val]>0: GRID[val]=max(255-(n*i),30)
+            sub=np.delete(sub,val)
+        GRID=GRID.reshape(shapesotre)
+        for c,i in enumerate(range(0,x,x_div)): #loop through grid space
+            for d,j in enumerate(range(0,y,y_div)):
+                image[j:j+y_div,i:i+x_div]=GRID[c][d]
+        #image=image-(av//co)
+        #image[image<0]=0
+        return image
 """
