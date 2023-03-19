@@ -59,3 +59,21 @@ If you wish to use a virtual tactip check out our dataset within <a>Assets/Video
 import RoboSkin as sk
 skin=sk.Skin(videoFile=path+"Movement4.avi")
 ```
+
+We can gather frame using ```skin.getFrame()``` to return what the camera of video is viewing. The video will play on repeat till you ```skin.release()```. You can also get a processed image using ```skin.getBinary()``` which returns a noise reduced binary image. 
+
+### Vector prediction
+
+The library estimates the movement of points between two frames. It takes an origin frame when you initialize the object. This attempts to maximize the amount of points it is reading. This function requires a binary image that has had been converted to an array of centroid points (n,2). We use the ```skin.getDots(image)``` function to gather this. It may not return the same size as your ```skin.origin``` points. The ```skin.movement(points)``` function will turn a centroid array of (n,2) and try and map each of these points to an origin array of (m,2) so each index between origin and the new point array represents that specific point. 
+
+```
+im=skin.getBinary() #get image
+t_=skin.getDots(im) #get the entroid points in the image
+t=skin.movement(t_) #get the prediccted points 
+```
+
+The distance between these points is calculated by the following equation where o is the origin points and t is the mapped points. It calculates the distances of all points as a matrix. 
+
+$d(o,t) = \sqrt{\sum_{i=1}^{n}(o_i-t_i)^2}$ 
+
+<img src="Assets/Output demos/movementVector.avi">
