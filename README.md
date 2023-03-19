@@ -76,4 +76,25 @@ The distance between these points is calculated by the following equation where 
 
 $d(o,t) = \sqrt{\sum_{i=1}^{n}(o_i-t_i)^2}$ 
 
+The result of plotting this is below:
+
 <img src="Assets/images/movementVector.gif">
+
+It is not a perfect method however helps find the general jist of movement.
+
+### Push prediction
+
+We may want to predict where the push is coming from within the sensor. This is done by chosing a grid size that will represent how large the receptive fields are. If our grid size is 5 then the tactile image will be viewed as a 5 $\times$ 5 image. 
+
+```
+past_Frame=skin.getBinary()
+image=np.zeros_like(past_frame)
+SPLIT=25 #25x25 receptive fields
+time.sleep(0.2) #time between
+im=skin.getBinary()
+image=skin.getForce(im,past_Frame,SPLIT,image=image) #get the force push
+past_Frame=im.copy()
+```
+
+
+<img src="Assets/images/Push.gif">
