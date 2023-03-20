@@ -72,7 +72,7 @@ t_=skin.getDots(im) #get the entroid points in the image
 t=skin.movement(t_) #get the prediccted points 
 ```
 
-The distance between these points is calculated by the following equation where o is the origin points and t is the mapped points. It calculates the distances of all points as a matrix. 
+The distance between these points is calculated by the following equation (Euclidean distance) where o is the origin points and t is the mapped points. It calculates the distances of points o and t. We pass matrices through the equations to calculate all distances.
 
 $d(o,t) = \sqrt{\sum_{i=1}^{n}(o_i-t_i)^2}$ 
 
