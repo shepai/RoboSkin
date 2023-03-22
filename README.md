@@ -88,7 +88,7 @@ We may want to predict where the push is coming from within the sensor. This is 
 
 The force within each grid point (denoted in a matrix that startes empty and recursevly enters this function $P$) calculates the difference between the frames $F$ at each index within the selected grid square. This is then averaged, with the global average subtracted from this to highlight change. Finally we subtract $\gamma$ which represents a temporal dampner that reduces pixels over time. This is how we get the faded affect as a stimuli drops. 
 
-$P_{j:d_x,i:d_y} = \frac{\sum_{j}^{d_x}\sum_{i}^{d_y} \left | F_{t,i,j} - F_{t+1,i,j}\right | }{(dx-j)*(dy-i)} - \gamma -\frac{\left | F_{t} - F_{t+1}\right |}{n}$
+$P_{j:d_x,i:d_y} = \frac{\sum_{j}^{d_x}\sum_{i}^{d_y} \left | F_{t,i,j} - F_{t+1,i,j}\right | }{(d_x-j)*(d_y-i)} - \gamma -\frac{\left | F_{t} - F_{t+1}\right |}{n}$
 
 ```
 past_Frame=skin.getBinary()
