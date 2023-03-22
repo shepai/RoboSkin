@@ -86,6 +86,10 @@ It is not a perfect method however helps find the general jist of movement.
 
 We may want to predict where the push is coming from within the sensor. This is done by chosing a grid size that will represent how large the receptive fields are. If our grid size is 5 then the tactile image will be viewed as a 5 $\times$ 5 image. 
 
+The force within each grid point (denoted in a matrix that startes empty and recursevly enters this function $P$) calculates the difference between the frames $F$ at each index within the selected grid square. This is then averaged, with the global average subtracted from this to highlight change. Finally we subtract $\gamma$ which represents a temporal dampner that reduces pixels over time. This is how we get the faded affect as a stimuli drops. 
+
+$P_{j:d_x,i:d_y} = \frac{\sum_{j}^{d_x}\sum_{i}^{d_y} \left | F_{t,i,j} - F_{t+1,i,j}\right | }{(dx-j)*(dy-i)} - \gamma -\frac{\left | F_{t} - F_{t+1}\right |}{n}$
+
 ```
 past_Frame=skin.getBinary()
 image=np.zeros_like(past_frame)
