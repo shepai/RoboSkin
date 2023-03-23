@@ -3,7 +3,7 @@ import letRun #This library can be deleted, it is used for debugging
 import RoboSkin as sk
 import numpy as np
 
-path="C:/Users/dexte/github/RoboSkin/Assets/Video demos/"
+path= letRun.path
 #videoFile=path+"Movement2.avi"
 skin=sk.Skin()
 frame=skin.getFrame()
