@@ -3,9 +3,9 @@ import letRun #This library can be deleted, it is used for debugging
 import RoboSkin as sk
 import numpy as np
 
-path="C:/Users/dexte/github/RoboSkin/Assets/Video demos/"
-
-skin=sk.Skin(videoFile=path+"Movement4.avi") #videoFile=path+"Movement2.avi"
+#path="C:/Users/dexte/github/RoboSkin/Assets/Video demos/"
+path= letRun.path
+skin=sk.Skin(videoFile=path+"Movement4.avi") #videoFile=path+"Movement4.avi"
 frame=skin.getFrame()
 old_T=skin.origin
 new=np.zeros_like(frame)
@@ -16,7 +16,7 @@ image=np.zeros_like(past_Frame)
 while(True):
     frame=skin.getFrame()
     im=skin.getBinary()
-    image=skin.getForce(im,past_Frame,SPLIT,image=image) #get the force push
+    image=skin.getForce(im,past_Frame,SPLIT,image=image,degrade=20) #get the force push
     past_Frame=im.copy() #get last frame
     tactile=np.zeros_like(new)
     tactile[:,:,2]=image #show push in red
