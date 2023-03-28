@@ -1,13 +1,10 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider, Button
 import math as maths
-import random
 from mpremote import pyboard
 import serial, time
 import sys
 import glob
-from multiprocessing import Process
+
 
 """
 Setup control with micropython device
@@ -64,7 +61,7 @@ class Board:
         self.COM.close()
 
 
-class arm:
+class Leg:
     def __init__(self):
         self.B=Board()
         #get serial boards and connect to first one
@@ -77,9 +74,11 @@ class arm:
                 COM=res[0]
             except IndexError:
                 time.sleep(1)
+        self.B.runFile("/its/home/drs25/Documents/GitHub/RoboSkin/Code/Examples/Robot leg/main_program.py")
         self.angle1=0
         self.angle2=0
         self.angle3=0
+        self.x=10
     def startPos(self):
         self.B.move(1,170)
         self.B.move(2,20)
@@ -87,9 +86,22 @@ class arm:
         self.angle1=170
         self.angle2=20
         self.angle3=140
-    def moveX(self,num):
-        angle1=self.angle1
-        angle2=self.angle2
-        
+    def moveX(self,x,d=15):
+        angle1=self.angle2
+        angle2=self.angle3
+        print(self.x+x)
+        mov=maths.acos((self.x+x)/d)
+        if x>0:
+            angle1+=maths.degrees(mov)
+        else: angle1-=maths.degrees(mov)
+        self.B.move(2,angle1)
+        self.angle2=angle1
+        print(self.angle2)
+    def close(self):
+        self.B.close()
 
-
+l=Leg()
+l.startPos()
+time.sleep(1)
+l.moveX(1)
+l.close()
