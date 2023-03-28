@@ -79,21 +79,23 @@ class Leg:
         self.angle2=0
         self.angle3=0
         self.x=10
+        self.d=15
     def startPos(self):
         self.B.move(1,170)
-        self.B.move(2,20)
+        self.B.move(2,maths.degrees(maths.acos((self.x)/self.d)))
         self.B.move(3,140)
         self.angle1=170
         self.angle2=20
         self.angle3=140
-    def moveX(self,x,d=15):
+    def moveX(self,x):
         angle1=self.angle2
         angle2=self.angle3
         print(self.x+x)
-        mov=maths.acos((self.x+x)/d)
-        if x>0:
-            angle1+=maths.degrees(mov)
-        else: angle1-=maths.degrees(mov)
+        mov=maths.acos((self.x+x)/self.d)
+        if x>=0:
+            angle1=maths.degrees(mov)
+        else: 
+            angle1=angle1+maths.degrees(mov)
         self.B.move(2,angle1)
         self.angle2=angle1
         print(self.angle2)
@@ -103,5 +105,5 @@ class Leg:
 l=Leg()
 l.startPos()
 time.sleep(1)
-l.moveX(1)
+l.moveX(-1)
 l.close()
