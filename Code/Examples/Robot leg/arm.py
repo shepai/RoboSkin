@@ -94,11 +94,11 @@ class Leg:
         mov=maths.asin((x)/self.d)
         #mov2=maths.acos((x)/self.d)
         angle1=angle1-maths.degrees(mov)
- 
+        angle2=angle2+maths.degrees(mov)
         self.B.move(2,angle1)
-        #self.B.move(3,angle2)
-        self.angle2=angle1-maths.degrees(mov)
-        #self.angle3=angle2-maths.degrees(mov2)
+        self.B.move(3,angle2)
+        self.angle2=angle1
+        self.angle3=angle2
 
         print(maths.degrees(mov),self.angle2,self.angle3)
     def close(self):
@@ -106,9 +106,14 @@ class Leg:
 
 l=Leg()
 l.startPos()
-for i in range(10):
-    time.sleep(0.5)
-    l.moveX(-i/10)
+time.sleep(0.5)
 
-l.startPos()
+for i in range(15):
+    time.sleep(0.10)
+    l.moveX(-i/10)
+for i in range(18):
+    time.sleep(0.10)
+    l.moveX(i/10)
+
+
 l.close()
