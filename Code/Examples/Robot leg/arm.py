@@ -101,19 +101,8 @@ class Leg:
         self.angle3=angle2
 
         print(maths.degrees(mov),self.angle2,self.angle3)
+    def moveY(self,y):
+        pass
     def close(self):
         self.B.close()
 
-l=Leg()
-l.startPos()
-time.sleep(0.5)
-
-for i in range(15):
-    time.sleep(0.10)
-    l.moveX(-i/10)
-for i in range(18):
-    time.sleep(0.10)
-    l.moveX(i/10)
-
-
-l.close()

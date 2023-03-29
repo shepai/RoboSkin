@@ -1,4 +1,4 @@
-from arm import Board
+from arm import Leg
 import time
 import cv2
 import numpy as np
@@ -23,25 +23,20 @@ import RoboSkin as sk
 
 #setup coms with skin and arm
 skin=sk.Skin(device=0) 
-B=Board()
+l=Leg()
+
+l.startPos()
+time.sleep(0.5)
+
+"""for i in range(15):
+    time.sleep(0.10)
+    l.moveX(-i/10)
+for i in range(18):
+    time.sleep(0.10)
+    l.moveX(i/10)"""
 
 
-#get serial boards and connect to first one
-COM=""
-while COM=="":
-    try:
-        res=B.serial_ports()
-        print("ports:",res)
-        B.connect(res[0])
-        COM=res[0]
-    except IndexError:
-        time.sleep(1)
 
-B.runFile("/its/home/drs25/Documents/GitHub/RoboSkin/Code/Examples/Robot leg/main_program.py")
-#get to start position
-B.move(1,170)
-B.move(2,20)
-B.move(3,140)
 
 frame=skin.getFrame()
 old_T=skin.origin
@@ -50,6 +45,8 @@ SPLIT=25
 past_Frame=skin.getBinary()
 image=np.zeros_like(past_Frame)
 
+i=0
+UP=True
 while(True):
     frame=skin.getFrame()
     im=skin.getBinary()
@@ -63,8 +60,23 @@ while(True):
     cv2.imshow('unprocessed', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+    bigTouch=np.sum(tactile)/255
+    if bigTouch<100: #if the force is not too much
+        if i==15: 
+            UP=not UP
+        elif i==0: 
+            l.startPos()
+            UP = not UP
+        m=i
+        if UP: 
+            i-=1
+            m=0-i
+        else: i+=1
+        l.moveX(m/10)
+        time.sleep(0.10)
+    else:
+        print("Too much",bigTouch)
+        l.startPos()
 skin.close()
 cv2.destroyAllWindows()
-
-
-B.close()
+l.close()
