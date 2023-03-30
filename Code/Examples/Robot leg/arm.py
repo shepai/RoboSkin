@@ -56,7 +56,8 @@ class Board:
                 pass
         return result
     def move(self,motor,angle):
-        self.COM.exec_raw_no_follow('moveMotor('+str(motor)+','+str(angle)+')')#.decode("utf-8").replace("\r\n","")
+        if angle<180 and angle>0:
+            self.COM.exec_raw_no_follow('moveMotor('+str(motor)+','+str(angle)+')')#.decode("utf-8").replace("\r\n","")
     def close(self):
         self.COM.close()
 
@@ -81,7 +82,7 @@ class Leg:
         self.x=10
         self.x1=0
         self.d=20
-    def moveSpeed(self,num,angleStart,angleEnd):
+    def moveSpeed(self,num,angleStart,angleEnd,t=0.25):
         angleEnd=int(angleEnd)
         angleStart=int(angleStart)
         if angleEnd!=angleStart:
@@ -90,8 +91,7 @@ class Leg:
             else: rang=range(angleStart,angleEnd,5)
             for i in rang:
                 self.B.move(num,i)
-                time.sleep(0.25)
-
+                time.sleep(t)
     def startPos(self):
         #self.B.move(1,170)
         #self.B.move(2,maths.degrees(maths.acos((self.x)/self.d)))
