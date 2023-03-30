@@ -46,13 +46,14 @@ while(True):
     tactile=np.zeros_like(new)
     tactile[:,:,2]=image #show push in red
     #tactile[:,:,0]=NEW
-    cv2.imshow('tactile', tactile)
+    cv2.imshow('tactile', tactile[98:])
     cv2.imshow('our binary',im)
     cv2.imshow('unprocessed', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
     bigTouch=np.sum(tactile)/(255*SPLIT*SPLIT)
     #break up into quaters
+    tactile=tactile[98:]
     q1=tactile[0:tactile.shape[0]//2,0:tactile.shape[1]//2]
     q2=tactile[0:tactile.shape[0]//2,tactile.shape[1]//2:]
     q3=tactile[tactile.shape[0]//2:,0:tactile.shape[1]//2]
@@ -66,11 +67,11 @@ while(True):
         for val in q.flatten():
             if val==0: 
                 print("q1")
-                l.move(2,-4)
+                l.move(2,4)
                 l.move(1,4)
             elif val==1: 
                 print("q2")
-                l.move(2,4)
+                l.move(2,-4)
                 l.move(1,4)
             elif val==2: 
                 print("q3")
