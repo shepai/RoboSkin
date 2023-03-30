@@ -113,7 +113,14 @@ class Leg:
         self.B.move(3,angle2)
         self.angle2=angle1
         self.angle3=angle2
-
+    def move(self,num,Bydegrees):
+        deg=[self.angle1,self.angle2,self.angle3]
+        d=deg[num-1]
+        self.B.move(num,d+Bydegrees)
+        if d+Bydegrees>0 and d+Bydegrees<180:
+            if num==1: self.angle1=d+Bydegrees
+            elif num==2: self.angle2=d+Bydegrees
+            elif num==3: self.angle3=d+Bydegrees
         #print(maths.degrees(mov),self.angle2,self.angle3)
     def moveY(self,y):
         pass

@@ -58,40 +58,25 @@ while(True):
     q3=tactile[tactile.shape[0]//2:,0:tactile.shape[1]//2]
     q4=tactile[tactile.shape[0]//2:,tactile.shape[1]//2:]
     quaters=np.array([np.sum(q1),np.sum(q2),np.sum(q3),np.sum(q4)]) /(255*SPLIT*SPLIT)
-    if np.max(quaters)>5 and bigTouch<35: #if the force is not too much:
+    if np.max(quaters)>3 and bigTouch<35: #if the force is not too much:
         #check what has the most pressure and move there
+        print(np.max(quaters))
         if np.argmax(quaters)==0: 
             print("q1")
-            ang=l.angle2
-            l.B.move(2,ang-5)
-            l.angle2=ang-5
-            ang=l.angle1
-            l.B.move(1,ang-5)
-            l.angle1=ang-5
+            l.move(2,-4)
+            l.move(1,4)
         elif np.argmax(quaters)==1: 
             print("q2")
-            ang=l.angle2
-            l.B.move(2,ang+5)
-            l.angle2=ang+5
-            ang=l.angle1
-            l.B.move(1,ang-5)
-            l.angle1=ang-5
+            l.move(2,4)
+            l.move(1,4)
         elif np.argmax(quaters)==2: 
             print("q3")
-            ang=l.angle2
-            l.B.move(2,ang+5)
-            l.angle2=ang+5
-            ang=l.angle1
-            l.B.move(1,ang+5)
-            l.angle1=ang+5
+            l.move(2,4)
+            l.move(1,-4)
         elif np.argmax(quaters)==3: 
             print("q4")
-            ang=l.angle2
-            l.B.move(2,ang-5)
-            l.angle2=ang-5
-            ang=l.angle1
-            l.B.move(1,ang+5)
-            l.angle1=ang+5
+            l.move(2,-4)
+            l.move(1,-4)
     elif bigTouch>30: #if too much pressure return to start position
         l.startPos()
 skin.close()
