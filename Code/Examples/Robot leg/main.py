@@ -50,7 +50,7 @@ UP=True
 while(True):
     frame=skin.getFrame()
     im=skin.getBinary()
-    image=skin.getForce(im,past_Frame,SPLIT,image=image,degrade=20) #get the force push
+    image=skin.getForce(im,past_Frame,SPLIT,image=image,degrade=70) #get the force push
     past_Frame=im.copy() #get last frame
     tactile=np.zeros_like(new)
     tactile[:,:,2]=image #show push in red
@@ -60,23 +60,25 @@ while(True):
     cv2.imshow('unprocessed', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-    bigTouch=np.sum(tactile)/255
-    if bigTouch<100: #if the force is not too much
-        if i==15: 
+    bigTouch=np.sum(tactile)/(255*SPLIT*SPLIT)
+    if bigTouch<30: #if the force is not too much
+        if i==30: 
             UP=not UP
         elif i==0: 
             l.startPos()
             UP = not UP
         m=i
         if UP: 
-            i-=1
+            i-=2
             m=0-i
-        else: i+=1
+        else: i+=2
         l.moveX(m/10)
         time.sleep(0.10)
     else:
         print("Too much",bigTouch)
-        l.startPos()
+        UP=True
+        #i=0
+        #UP=True
 skin.close()
 cv2.destroyAllWindows()
 l.close()

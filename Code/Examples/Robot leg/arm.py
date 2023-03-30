@@ -75,18 +75,32 @@ class Leg:
             except IndexError:
                 time.sleep(1)
         self.B.runFile("/its/home/drs25/Documents/GitHub/RoboSkin/Code/Examples/Robot leg/main_program.py")
-        self.angle1=0
-        self.angle2=0
-        self.angle3=0
+        self.angle1=160
+        self.angle2=10
+        self.angle3=130
         self.x=10
         self.x1=0
         self.d=20
+    def moveSpeed(self,num,angleStart,angleEnd):
+        angleEnd=int(angleEnd)
+        angleStart=int(angleStart)
+        if angleEnd!=angleStart:
+            rang=None
+            if angleStart>angleEnd: rang=reversed(range(angleEnd,angleStart,5))
+            else: rang=range(angleStart,angleEnd,5)
+            for i in rang:
+                self.B.move(num,i)
+                time.sleep(0.25)
+
     def startPos(self):
-        self.B.move(1,170)
-        self.B.move(2,maths.degrees(maths.acos((self.x)/self.d)))
-        self.B.move(3,140)
+        #self.B.move(1,170)
+        #self.B.move(2,maths.degrees(maths.acos((self.x)/self.d)))
+        #self.B.move(3,140)
+        self.moveSpeed(1,self.angle1,170)
+        self.moveSpeed(2,self.angle2,maths.degrees(maths.acos((self.x)/self.d)))
+        self.moveSpeed(3,self.angle3,140)
         self.angle1=170
-        self.angle2=20
+        self.angle2=maths.degrees(maths.acos((self.x)/self.d))
         self.angle3=140
     def moveX(self,x):
         angle1=self.angle2
@@ -100,7 +114,7 @@ class Leg:
         self.angle2=angle1
         self.angle3=angle2
 
-        print(maths.degrees(mov),self.angle2,self.angle3)
+        #print(maths.degrees(mov),self.angle2,self.angle3)
     def moveY(self,y):
         pass
     def close(self):
