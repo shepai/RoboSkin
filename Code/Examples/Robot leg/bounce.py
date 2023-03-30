@@ -44,8 +44,9 @@ new=np.zeros_like(frame)
 SPLIT=25
 past_Frame=skin.getBinary()
 image=np.zeros_like(past_Frame)
-
-i=0
+first=False
+l.moveX(3)
+i=2
 UP=True
 while(True):
     frame=skin.getFrame()
@@ -67,12 +68,15 @@ while(True):
         elif i==0: 
             l.startPos()
             UP = not UP
-        m=i
+        m=10
         if UP: 
             i-=2
-            m=0-i
+            m=-10
         else: i+=2
         l.moveX(m/10)
+        if not first:
+            first=True
+            l.setStart()
         time.sleep(0.10)
     else:
         print("Too much",bigTouch)

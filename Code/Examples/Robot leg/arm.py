@@ -64,24 +64,28 @@ class Board:
 
 class Leg:
     def __init__(self):
-        self.B=Board()
+        self.Board=Board()
         #get serial boards and connect to first one
         COM=""
         while COM=="":
             try:
-                res=self.B.serial_ports()
+                res=self.Board.serial_ports()
                 print("ports:",res)
-                self.B.connect(res[0])
+                self.Board.connect(res[0])
                 COM=res[0]
             except IndexError:
                 time.sleep(1)
-        self.B.runFile("/its/home/drs25/Documents/GitHub/RoboSkin/Code/Examples/Robot leg/main_program.py")
+        self.Board.runFile("/its/home/drs25/Documents/GitHub/RoboSkin/Code/Examples/Robot leg/main_program.py")
+        
         self.angle1=160
         self.angle2=10
         self.angle3=130
         self.x=10
         self.x1=0
         self.d=20
+        self.A=160
+        self.B=maths.degrees(maths.acos((self.x)/self.d))
+        self.C=130
     def moveSpeed(self,num,angleStart,angleEnd,t=0.25):
         angleEnd=int(angleEnd)
         angleStart=int(angleStart)
@@ -90,33 +94,37 @@ class Leg:
             if angleStart>angleEnd: rang=reversed(range(angleEnd,angleStart,5))
             else: rang=range(angleStart,angleEnd,5)
             for i in rang:
-                self.B.move(num,i)
+                self.Board.move(num,i)
                 time.sleep(t)
+    def setStart(self):
+        self.A=self.angle1
+        self.B=self.angle2
+        self.C=self.angle3
     def startPos(self):
         #self.B.move(1,170)
         #self.B.move(2,maths.degrees(maths.acos((self.x)/self.d)))
         #self.B.move(3,140)
-        self.moveSpeed(1,self.angle1,170)
-        self.moveSpeed(2,self.angle2,maths.degrees(maths.acos((self.x)/self.d)))
-        self.moveSpeed(3,self.angle3,140)
-        self.angle1=170
-        self.angle2=maths.degrees(maths.acos((self.x)/self.d))
-        self.angle3=140
+        self.moveSpeed(1,self.angle1,self.A)
+        self.moveSpeed(2,self.angle2,self.B)
+        self.moveSpeed(3,self.angle3,self.C)
+        self.angle1=self.A
+        self.angle2=self.B
+        self.angle3=self.C
     def moveX(self,x):
         angle1=self.angle2
         angle2=self.angle3
-        mov=maths.asin((x)/self.d)
+        mov=maths.asin((1)/self.d) * x #one unit of distance times distance
         #mov2=maths.acos((x)/self.d)
         angle1=angle1-maths.degrees(mov)
         angle2=angle2+maths.degrees(mov)
-        self.B.move(2,angle1)
-        self.B.move(3,angle2)
+        self.Board.move(2,angle1)
+        self.Board.move(3,angle2)
         self.angle2=angle1
         self.angle3=angle2
     def move(self,num,Bydegrees):
         deg=[self.angle1,self.angle2,self.angle3]
         d=deg[num-1]
-        self.B.move(num,d+Bydegrees)
+        self.Board.move(num,d+Bydegrees)
         if d+Bydegrees>0 and d+Bydegrees<180:
             if num==1: self.angle1=d+Bydegrees
             elif num==2: self.angle2=d+Bydegrees
@@ -125,5 +133,5 @@ class Leg:
     def moveY(self,y):
         pass
     def close(self):
-        self.B.close()
+        self.Board.close()
 
