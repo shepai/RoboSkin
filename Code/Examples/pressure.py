@@ -13,6 +13,11 @@ SPLIT=25
 past_Frame=skin.getBinary()
 image=np.zeros_like(past_Frame)
 
+#uncomment to record video
+"""p=np.concatenate((new,new),axis=1)
+h, w = p.shape[:2]
+out = cv2.VideoWriter('skinPressure.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, (w,h))"""
+
 while(True):
     frame=skin.getFrame()
     im=skin.getBinary()
@@ -26,5 +31,7 @@ while(True):
     cv2.imshow('unprocessed', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+    o#ut.write(np.concatenate((frame,tactile),axis=1)) #uncomment to record video
 skin.close()
 cv2.destroyAllWindows()
+#out.release() #uncomment to record video
