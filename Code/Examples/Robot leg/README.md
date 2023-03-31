@@ -19,4 +19,4 @@ The leg will move up and down the axis, encountering the surface at the furthest
 
 The reading of pressure is broken up into quarters and each corner summed. The highest value would determine what direction the leg would move in. Using pre-determined logic, the arm would move away from the stimuli. This made use of the hip joint.  
 
-<img src="./././Assets/images/runAway.gif">
+<img src="https://github.com/shepai/RoboSkin/blob/main/Assets/images/runAway.gif">
