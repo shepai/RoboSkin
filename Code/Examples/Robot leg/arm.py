@@ -86,7 +86,7 @@ class Leg:
         self.A=160
         self.B=maths.degrees(maths.acos((self.x)/self.d))
         self.C=130
-    def moveSpeed(self,num,angleStart,angleEnd,t=0.25):
+    def moveSpeed(self,num,angleStart,angleEnd,t=0.05):
         angleEnd=int(angleEnd)
         angleStart=int(angleStart)
         if angleEnd!=angleStart:
