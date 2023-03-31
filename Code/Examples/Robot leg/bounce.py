@@ -46,7 +46,7 @@ past_Frame=skin.getBinary()
 image=np.zeros_like(past_Frame)
 first=False
 l.moveX(3)
-i=2
+i=0
 UP=True
 while(True):
     frame=skin.getFrame()
@@ -63,21 +63,21 @@ while(True):
         break
     bigTouch=np.sum(tactile)/(255*SPLIT*SPLIT)
     if bigTouch<30: #if the force is not too much
-        if i==30: 
-            UP=not UP
+        if i==40: 
+            UP=True
         elif i==0: 
             l.startPos()
-            UP = not UP
+            UP = False
         m=10
         if UP: 
             i-=2
             m=-10
         else: i+=2
         l.moveX(m/10)
-        if not first:
+        if not first and i==20:
             first=True
             l.setStart()
-        time.sleep(0.10)
+        time.sleep(0.02)
     else:
         print("Too much",bigTouch)
         UP=True
