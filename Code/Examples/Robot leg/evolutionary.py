@@ -38,22 +38,22 @@ for i in range(18):
 def getImage(image,past_Frame):
     frame=skin.getFrame()
     im=skin.getBinary()
-    image=skin.getForce(im,past_Frame,SPLIT,image=image,degrade=70) #get the force push
+    if type(past_Frame)==type(None):
+        past_Frame=im.copy()
+    image=skin.getForce(im,past_Frame,SPLIT,image=image,degrade=200) #get the force push
     past_Frame=im.copy() #get last frame
     tactile=np.zeros_like(new)
     tactile[:,:,2]=image #show push in red
     return tactile,past_Frame,image
 
 def touchDown(m,past_Frame):
-    print("touch")
     time.sleep(1)
     image=np.zeros_like(past_Frame)
-    tactileO,past_Frame,image=getImage(image,past_Frame)
-    l.moveX((m-1)/10)
-    time.sleep(0.5)
-    l.moveX((m+1)/10) #return to normal
+    tactileO,past_Frame,image=getImage(image,None)
+    l.moveX((-10)/10)
+    time.sleep(0.2)
     tactileN,past_Frame,image=getImage(image,past_Frame)
-    print("done")
+    l.moveX((10)/10) #return to normal
     return tactileN,past_Frame,image
 
 frame=skin.getFrame()
@@ -66,27 +66,27 @@ image=np.zeros_like(past_Frame)
 i=0
 UP=True
 first=False
+
 while(True):
     tactile,past_Frame,image=getImage(image,past_Frame)
     
     bigTouch=np.sum(tactile)/(255*SPLIT*SPLIT)
     if bigTouch<25: #if the force is not too much
-        if i>=30: 
-            UP=not UP
-        elif i<=0: 
+        if i==40: 
+            UP=True
+        elif i==0: 
             l.startPos()
-            UP = not UP
+            UP = False
         m=10
         if UP: 
             i-=2
             m=-10
         else: i+=2
-
         l.moveX(m/10)
-        if not first:
+        if not first and i==20:
             first=True
             l.setStart()
-        time.sleep(0.10)
+        time.sleep(0.02)
     elif bigTouch>25 and bigTouch<50:
         m=10
         if UP: 
@@ -95,6 +95,7 @@ while(True):
         cv2.imshow('tactile', change)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+        l.setStart()
     else:
         print("Too much",bigTouch)
         UP=True
