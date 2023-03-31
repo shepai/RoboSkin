@@ -13,10 +13,10 @@ The knee would be calculated by adding $\theta$ and the head joint would subtrac
 ## bounce
 The leg will move up and down the axis, encountering the surface at the furthest extension of the leg. If the tactip was intercepted by an object it would detect this, and if the object had a higher force than the motors, the leg would move upwards. This effectively demonstrated the TacTip as an analogue push sensor. 
 
-<img src="Assets/images/armTouch.gif">
+<img src="./././Assets/images/armTouch.gif">
 
 ## Move away
 
 The reading of pressure is broken up into quarters and each corner summed. The highest value would determine what direction the leg would move in. Using pre-determined logic, the arm would move away from the stimuli. This made use of the hip joint.  
 
-<img src="Assets/images/runAway.gif">
+<img src="./././Assets/images/runAway.gif">
