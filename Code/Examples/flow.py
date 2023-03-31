@@ -10,6 +10,11 @@ frame=skin.getFrame()
 old_T=skin.origin
 new=np.zeros_like(frame) 
 
+#uncomment to record video
+"""p=np.concatenate((new,new),axis=1)
+h, w = p.shape[:2]
+out = cv2.VideoWriter('skinDIrection.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, (w,h))"""
+
 while(True):
     im=skin.getBinary()
     new=np.zeros_like(frame)
@@ -27,10 +32,13 @@ while(True):
             #d=skin.euclid(np.array([x1, y1]), np.array([x2, y2]))
             cv2.arrowedLine(new, (x2, y2), (x1, y1), (0, 255, 0), thickness=1)#
     #show user the imagesS
+    sk=skin.getFrame()
     cv2.imshow('spots', new)
     cv2.imshow('our binary',im)
-    cv2.imshow('unprocessed', skin.getFrame())
+    cv2.imshow('unprocessed', sk)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+    #out.write(np.concatenate((sk,new),axis=1)) #uncomment to record video
 skin.close()
 cv2.destroyAllWindows()
+#out.release() #uncomment to record video
