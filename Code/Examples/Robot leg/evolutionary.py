@@ -22,7 +22,7 @@ sys.path.insert(1, '/its/home/drs25/Documents/GitHub/RoboSkin/Code')
 import RoboSkin as sk
 
 #setup coms with skin and arm
-skin=sk.Skin(device=0) 
+skin=sk.Skin(device=1) 
 l=Leg()
 
 l.startPos()
@@ -44,16 +44,17 @@ def getImage(image,past_Frame):
     past_Frame=im.copy() #get last frame
     tactile=np.zeros_like(new)
     tactile[:,:,2]=image #show push in red
+    past_Frame=im.copy()
     return tactile,past_Frame,image
 
-def touchDown(m,past_Frame):
+def touchDown(past_Frame):
     time.sleep(1)
     image=np.zeros_like(past_Frame)
     tactileO,past_Frame,image=getImage(image,None)
-    l.moveX((-10)/10)
-    time.sleep(0.2)
+    l.moveX((10)/10)
+    time.sleep(1)
     tactileN,past_Frame,image=getImage(image,past_Frame)
-    l.moveX((10)/10) #return to normal
+    l.moveX((-10)/10) #return to normal
     return tactileN,past_Frame,image
 
 frame=skin.getFrame()
@@ -66,7 +67,7 @@ image=np.zeros_like(past_Frame)
 i=0
 UP=True
 first=False
-
+LIMIT=50
 while(True):
     tactile,past_Frame,image=getImage(image,past_Frame)
     
@@ -87,20 +88,19 @@ while(True):
             first=True
             l.setStart()
         time.sleep(0.02)
-    elif bigTouch>25 and bigTouch<50:
-        m=10
-        if UP: 
-            m=-10
-        change,past_Frame,image=touchDown(m,past_Frame)
+    elif bigTouch>25 and bigTouch<LIMIT:
+        change,past_Frame,image=touchDown(past_Frame)
         cv2.imshow('tactile', change)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-        l.setStart()
+        l.startPos()
+        i=0
+        UP=True
     else:
         print("Too much",bigTouch)
         UP=True
         #i=0
         #UP=True
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 skin.close()
 cv2.destroyAllWindows()
 l.close()
