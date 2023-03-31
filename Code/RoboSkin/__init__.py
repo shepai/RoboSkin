@@ -318,7 +318,8 @@ class Skin: #skin object for detecting movement
                     if val!=0: #calculate average of filled in points
                         average+=val
                         num+=1
-        image=image-(average//num) #subtract the light average
+        if num!=0:
+            image=image-(average//num) #subtract the light average
         image[image<0]=0
         return image
     def close(self):
