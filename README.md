@@ -102,3 +102,10 @@ past_Frame=im.copy()
 
 
 <img src="Assets/images/Push.gif">
+
+### Motor control
+
+This information from the senor can be used within robotic systems. For example we can use a robotic leg and move it away from contact.
+
+
+<img src="Assets/images/runAway.gif">
