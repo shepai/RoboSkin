@@ -88,14 +88,17 @@ class Leg:
         self.C=30
     def moveSpeed(self,num,angleStart,angleEnd,t=0.05):
         angleEnd=int(angleEnd)
-        angleStart=int(angleStart)
+        angleStart=max(min(int(angleStart),180),0)
         if angleEnd!=angleStart:
             rang=None
-            if angleStart>angleEnd: rang=reversed(range(angleEnd,angleStart,5))
-            else: rang=range(angleStart,angleEnd,5)
+            if angleStart<angleEnd: 
+                rang=reversed(range(angleStart,angleEnd,5))
+            else: 
+                rang=range(angleStart,angleEnd,5)
             for i in rang:
                 self.Board.move(num,i)
                 time.sleep(t)
+                #print(num,i,"...")
     def setStart(self):
         self.A=self.angle1
         self.B=self.angle2
