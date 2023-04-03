@@ -79,13 +79,13 @@ class Leg:
         
         self.angle1=160
         self.angle2=10
-        self.angle3=130
+        self.angle3=30
         self.x=10
         self.x1=0
         self.d=20
         self.A=160
         self.B=maths.degrees(maths.acos((self.x)/self.d))
-        self.C=130
+        self.C=30
     def moveSpeed(self,num,angleStart,angleEnd,t=0.05):
         angleEnd=int(angleEnd)
         angleStart=int(angleStart)
@@ -116,7 +116,7 @@ class Leg:
         mov=maths.asin((1)/self.d) * x #one unit of distance times distance
         #mov2=maths.acos((x)/self.d)
         angle1=angle1-maths.degrees(mov)
-        angle2=angle2+maths.degrees(mov)
+        angle2=angle2+maths.degrees(mov)-30
         self.Board.move(2,angle1)
         self.Board.move(3,angle2)
         self.angle2=angle1
