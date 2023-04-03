@@ -73,7 +73,6 @@ def runTrial(agent,T,dt):
     t=0
     fit=0
     l.startPos()
-    time.sleep(1)
     while t<T:
         #gather signal
         tactile,past_Frame,image,vec=getImage(image,past_Frame,new,SPLIT)
@@ -86,10 +85,8 @@ def runTrial(agent,T,dt):
         if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         #trial
-        if bigTouch>40 or l.angle2>110:
+        if bigTouch>35 or l.angle2>110:
             print("Too much",bigTouch,l.angle2)
-            l.startPos()
-            time.sleep(1)
             fit=0
             break
         else:
@@ -98,7 +95,7 @@ def runTrial(agent,T,dt):
                 fit+=dt
             else:
                 l.moveX(-1)
-               
+            time.sleep(0.1)
         t+=dt
     return fit/T
 
