@@ -134,4 +134,3 @@ class Leg:
         pass
     def close(self):
         self.Board.close()
-
