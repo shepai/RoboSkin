@@ -72,7 +72,7 @@ def runTrial(agent,T,dt):
         tactile,past_Frame,image,vec=getImage(image,past_Frame,new,SPLIT)
     t=0
     fit=0
-    l.setStart()
+    l.startPos()
     time.sleep(1)
     while t<T:
         #gather signal
@@ -116,7 +116,7 @@ def run(agent,population,generations=500):
 
     for gen in range(generations):
         clear()
-        print("Generation:",gen,"Fitness",runTrial(arm,2,dt))
+        print("Generation:",gen,"Fitness",overTime[max(gen-1,0)])
         #get mask to select genotypes for battle
         mask=np.random.choice([0, 1], size=pop_size)
         inds=(mask==1).nonzero()[0]
@@ -179,7 +179,7 @@ T=2
 SIZE=100
 pop=np.random.normal(0,3,(SIZE,arm.num_genes))
 
-generations=500
+generations=100
 print(run(arm,pop,generations))
     
 skin.close()
