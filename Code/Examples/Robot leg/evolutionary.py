@@ -39,19 +39,7 @@ def getImage(image,past_Frame,new,SPLIT):
     im=skin.getBinary()
     t_=skin.getDots(im)
     t=skin.movement(t_)
-    vectors=[]
-    if t.shape[0]>2:
-        new[t[:,0],t[:,1]]=(0,255,0)
-        new[old_T[:,0],old_T[:,1]]=(0,0,255)
-        for i,coord in enumerate(t): #show vectors of every point
-            x1=coord[1]
-            y1=coord[0]
-            x2=old_T[i][1]
-            y2=old_T[i][0]
-            #cv2.putText(new,str(i),(x1,y1),cv2.FONT_HERSHEY_SIMPLEX,0.2,(0,255,0))
-            #d=skin.euclid(np.array([x1, y1]), np.array([x2, y2]))
-            cv2.arrowedLine(tactile, (x2, y2), (x1, y1), (0, 255, 0), thickness=1)#
-            vectors.append([x2-x1,y2-y1])
+    vectors=old_T-t
     if type(past_Frame)==type(None):
         past_Frame=im.copy()
     image=skin.getForce(im,past_Frame,SPLIT,image=image,degrade=200) #get the force push
@@ -80,8 +68,12 @@ def runTrial(agent,T,dt):
     past_Frame=skin.getBinary()
     image=np.zeros_like(past_Frame)
     old_T=skin.origin #get old direction
+    for i in range(10): #cycle out noise
+        tactile,past_Frame,image,vec=getImage(image,past_Frame,new,SPLIT)
     t=0
     fit=0
+    l.setStart()
+    time.sleep(1)
     while t<T:
         #gather signal
         tactile,past_Frame,image,vec=getImage(image,past_Frame,new,SPLIT)
@@ -90,10 +82,12 @@ def runTrial(agent,T,dt):
         v=torch.tensor(vec).flatten()
         a=agent.forward(v)
         move=np.argmax(a.detach().numpy())
-
+        cv2.imshow('tactile', tactile)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
         #trial
-        if bigTouch>25 or l.angle2>100:
-            print("Too much",bigTouch)
+        if bigTouch>40 or l.angle2>110:
+            print("Too much",bigTouch,l.angle2)
             l.startPos()
             time.sleep(1)
             fit=0
@@ -101,13 +95,10 @@ def runTrial(agent,T,dt):
         else:
             if move==0:
                 l.moveX(1)
+                fit+=dt
             else:
                 l.moveX(-1)
-            fit+=dt
-        cv2.imshow('tactile', tactile)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-    
+               
         t+=dt
     return fit/T
 
@@ -189,7 +180,7 @@ SIZE=100
 pop=np.random.normal(0,3,(SIZE,arm.num_genes))
 
 generations=500
-run(arm,pop,generations)
+print(run(arm,pop,generations))
     
 skin.close()
 cv2.destroyAllWindows()
