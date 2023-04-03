@@ -110,8 +110,8 @@ def run(agent,population,generations=500):
     shape=population.shape[1]
     fitness_matrix=np.zeros((pop_size))
     overTime=np.zeros((generations,))
-
-    for gen in range(generations):
+    gen=0
+    while gen < (generations) and overTime[max(gen-1,0)]<1:
         clear()
         print("Generation:",gen,"Fitness",overTime[max(gen-1,0)])
         #get mask to select genotypes for battle
@@ -158,6 +158,7 @@ def run(agent,population,generations=500):
             elif i<(len(inds)//2)-winners-mutants: #the other
                 population[inds[old_index][1-genoWin]]=gen_genotype(shape=shape) #create new genotype
         overTime[gen]=np.max(fitness_matrix)
+        gen+=1
     return overTime
 
 old_T=skin.origin

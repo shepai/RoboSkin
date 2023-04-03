@@ -118,8 +118,9 @@ class Leg:
         angle2=self.angle3
         mov=maths.asin((1)/self.d) * x #one unit of distance times distance
         #mov2=maths.acos((x)/self.d)
-        angle1=angle1-maths.degrees(mov)
-        angle2=angle2+maths.degrees(mov)-30
+        angle1=max(min(int(angle1-maths.degrees(mov)),180),0)
+        angle2=max(min(int(angle2+maths.degrees(mov)-30),180),0)
+        
         self.Board.move(2,angle1)
         self.Board.move(3,angle2)
         self.angle2=angle1
