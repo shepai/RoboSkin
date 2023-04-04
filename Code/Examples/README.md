@@ -6,10 +6,10 @@ Flow demonstrates trying to predict where the points are moving. This provides d
 
 <img src="Assets/images/movementVector.gif">
 
-## opticFLow 
+## OpticFLow 
 This shows the difference btween he flow algorithm and an optic flow algorithm. Both have heir pros and cons.
 
-## pressure
+## Pressure
 This example breaks the sensed area into receptive fields - this is represented be an n $\times$ n grid. 
 
 <img src="Assets/images/Push.gif">
