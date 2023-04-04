@@ -109,3 +109,35 @@ This information from the senor can be used within robotic systems. For example 
 
 
 <img src="Assets/images/runAway.gif">
+
+
+### DigiTip
+
+We have developed a simulated tacTip that is attempts to mimic the real sensor. For this we create a virtual environment using perlin noise. This is made using our environment class that takes in an x and y for the shape it will take. Make sure the environment shape is larger than the TacTip. The TacTip itself uses a still frame of the sensor with no pressure applied. This is masked over a grid that calculates the presurre from the environment, then larger areas are resized to show the push. 
+
+```
+import RoboSkin as sk
+img = cv2.imread(path+'flat.png')
+shrink=(np.array(img.shape[0:2])//3).astype(int)
+img=cv2.resize(img,(shrink[1],shrink[0]),interpolation=cv2.INTER_AREA)[60:220,75:220] #gets the tip as a square
+
+h,w=img.shape[0:2]
+env=sk.environment(w*4,w*4) #create environment 4 times the size
+tip=sk.digiTip(img) #create tactip
+```
+
+When we create out skin object, we want it to use the image. This is done as a parameter on initialisation. 
+
+```
+skin=sk.Skin(imageFile=img) #create the image
+```
+
+When we are running the code we can find the difference in pressure as a matrix using the ```tip.getImage(env.get())``` where ```env.get()``` provides the perlin noise environment. This function returns a matrix of pressures. Our ```tip.maskPush(im)``` will get the pressure matrix and apply it over the tactip image ```img```. Each time we update the pressure we must set it in the skin, so that it can grab it from the ```getFrame``` function. 
+
+```
+im=tip.getImage(env.get()) #get digiTip image
+mask=tip.maskPush(im) #get mask over image
+skin.setImage(mask) #set it in skin
+```
+
+<img src="Assets/images/digiTip.gif">
