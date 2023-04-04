@@ -2,7 +2,8 @@ from arm import Leg
 import time
 import cv2
 import numpy as np
-from agent import *
+import torch
+
 import os
 from copy import deepcopy as DC
 #################################################################
@@ -25,7 +26,7 @@ sys.path.insert(1, 'C:/Users/dexte/github/RoboSkin/Code/')
 sys.path.insert(1, '/its/home/drs25/Documents/GitHub/RoboSkin/Code')
 
 #################################################################
-
+import Models.agent as agent
 import RoboSkin as sk
 
 #setup coms with skin and arm
@@ -163,7 +164,7 @@ def run(agent,population,generations=500):
 
 old_T=skin.origin
 #create an agent
-arm=Agent(len(old_T.flatten()),[40,40],2)
+arm=agent.Agent(len(old_T.flatten()),[40,40],2)
 genes=np.random.normal(0,3,(arm.num_genes,))
 arm.set_genes(genes)
 
