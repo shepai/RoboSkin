@@ -42,17 +42,19 @@ class camera360: #class for interfacing with a homemade 360 camera
         self.cap2.release()
         
 class Skin: #skin object for detecting movement
-    def __init__(self,device=1,videoFile=""):
+    def __init__(self,device=1,videoFile="",imageFile=""):
         """
         set up correct camera/ video component
         set up all variables for optic flow and establish a baseline
         @param device selects which camera to take from
         @param videoFile points to a file to use instead of the camera
+        @param imageFile is if we are using the digitip from the simulation
         """
         if type(device)==type(camera360(ignore=True)): self.cap=device
         elif videoFile=="": self.cap = cv2.VideoCapture(device)
+        elif type(imageFile)!=type(""): self.cap=imageFile
         else: self.cap = cv2.VideoCapture(videoFile)
-        
+        self.imF=imageFile
         self.vid=videoFile #save viceo file
         self.centre=np.array(self.getFrame().shape[0:-1])//2 #get centre of frame
         self.startIm=None
@@ -77,6 +79,7 @@ class Skin: #skin object for detecting movement
         """
         get a frame from the camera
         """
+        if type(self.imF)!=type(""): return self.cap #if we are using the image frame we will set this outside the loop
         ret, frame = self.cap.read()
         if not ret: #reopen if closed
             self.cap.release()
