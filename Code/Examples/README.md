@@ -17,7 +17,7 @@ This example breaks the sensed area into receptive fields - this is represented 
 ## Robot leg
 Robot leg provides the intrefacing with a Raspberry Pi Pico that is hooked up to a kitronics robot hat. The servos are wired to outputs 1, 2 and 3. The start positions are manually set in the Leg class to match the robot leg we made. You can easily edit this to match start positions for your own in the initilizer class. 
 
-<img width="30%"; src="Assets/images/runAway.gif">
+<img width="30%" src="Assets/images/runAway.gif">
 
 ## Minimal simulation
 This example makes use of a virtual tactip and attempts to map simulated environmental information onto the tactip. Areas that come into contact with the surface will expand, as if it was getting closer to the camera. 
