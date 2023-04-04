@@ -50,11 +50,14 @@ class Skin: #skin object for detecting movement
         @param videoFile points to a file to use instead of the camera
         @param imageFile is if we are using the digitip from the simulation
         """
+        self.MAX=22000000
         if type(device)==type(camera360(ignore=True)): self.cap=device
-        elif type(imageFile)!=type(""): self.cap=imageFile
+        elif type(imageFile)!=type(""): 
+            self.cap=imageFile
+            self.MAX=1000
         elif videoFile=="": self.cap = cv2.VideoCapture(device)
         else: self.cap = cv2.VideoCapture(videoFile)
-        self.imF=imageFile
+        self.imF=copy.deepcopy(imageFile)
         self.vid=videoFile #save viceo file
         self.centre=np.array(self.getFrame().shape[0:-1])//2 #get centre of frame
         self.startIm=None
@@ -75,11 +78,17 @@ class Skin: #skin object for detecting movement
         self.good_new=[]
         self.good_old=[]
         self.p0 = cv2.goodFeaturesToTrack(past, mask = None, **feature_params)
+    def setImage(self,image):
+        """
+        set the image for the digi tip
+        @param image
+        """
+        self.imF=copy.deepcopy(image)
     def getFrame(self):
         """
         get a frame from the camera
         """
-        if type(self.imF)!=type(""): return self.cap #if we are using the image frame we will set this outside the loop
+        if type(self.imF)!=type(""): return self.imF#if we are using the image frame we will set this outside the loop
         ret, frame = self.cap.read()
         if not ret: #reopen if closed
             self.cap.release()
@@ -101,12 +110,12 @@ class Skin: #skin object for detecting movement
         sum=0
         MAXITER=1000
         i=0
-        while sum<22000000 and i<MAXITER: #loop till large picel value found
+        while sum<self.MAX and i<MAXITER: #loop till large picel value found
             frame[frame>threshold]=255
             frame[frame<=threshold]=0
             sum=np.sum(frame)
-            if sum>22000000:threshold+=1
-            elif sum<22000000:threshold-=1
+            if sum>self.MAX:threshold+=1
+            elif sum<self.MAX:threshold-=1
             frame=np.copy(img)
             i+=1
         frame[frame>threshold]=255
@@ -171,14 +180,15 @@ class Skin: #skin object for detecting movement
                 temp.append(t[i])
         t=np.array(temp)
         return t
-    def getBinary(self):
+    def getBinary(self,min_size = 300):
         """
         get the binary image from the sensor and return only the white dots (filter out glare)
         """
         image=self.getFrame()
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        gray=image
+        if len(image.shape)==3: gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         binary=self.adaptive(gray)
-        to_Show,spots=self.removeBlob(binary)
+        to_Show,spots=self.removeBlob(binary,min_size = min_size)
         return spots.astype(np.uint8)
     def zero(self,iter=50):
         """
