@@ -4,13 +4,12 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
-from digiTip import *
 
 path=""
 if os.name == 'nt':
-    path="C:/Users/dexte/github/RoboSkin/Assets/Video demos/"
+    path="C:/Users/dexte/github/RoboSkin/Assets/images/"
 else:
-    path="/its/home/drs25/Documents/GitHub/RoboSkin/Assets/Video demos/"
+    path="/its/home/drs25/Documents/GitHub/RoboSkin/images/"
 
 # caution: path[0] is reserved for script path (or '' in REPL)
 sys.path.insert(1, 'C:/Users/dexte/github/RoboSkin/Code/')
@@ -18,16 +17,17 @@ sys.path.insert(1, '/its/home/drs25/Documents/GitHub/RoboSkin/Code')
 
 import RoboSkin as sk
 
-skin=sk.RoboSkin()
-
-img = cv2.imread('C:/Users/dexte/github/RoboSkin/Assets/images/flat.png')
+#download example pic
+img = cv2.imread(path+'flat.png')
 shrink=(np.array(img.shape[0:2])//3).astype(int)
 img=cv2.resize(img,(shrink[1],shrink[0]),interpolation=cv2.INTER_AREA)[60:220,75:220]
 
+skin=sk.Skin(imageFile=img) #create the image
+print("Skin loaded")
 h,w=img.shape[0:2]
-env=environment(w*4,w*4) #create environment
+env=sk.environment(w*4,w*4) #create environment
 
-tip=digiTip(img) #create tactip
+tip=sk.digiTip(img) #create tactip
 
 for i in range(0,tip.h,10):
     tip.h-=10
