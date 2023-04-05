@@ -37,11 +37,11 @@ env=sk.environment(w*4,w*4) #create environment
 SIZE=250
 tip=sk.digiTip(img) #create tactip
 
-f=np.concatenate((past_Frame,image,image),axis=1).astype(np.uint8)
+"""f=np.concatenate((past_Frame,image,image),axis=1).astype(np.uint8)
 f=cv2.resize(f,(1000,400),interpolation=cv2.INTER_AREA)
 f=cv2.cvtColor(f,cv2.COLOR_GRAY2RGB)
 h, w = f.shape[:2]
-out = cv2.VideoWriter('digiTip.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, (w,h))
+out = cv2.VideoWriter('digiTip.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, (w,h))"""
 
 #move down
 tip.h=100
@@ -68,8 +68,8 @@ for i in range(0,tip.h,10):
     f_=np.concatenate((past_Frame,image,terrain),axis=1).astype(np.uint8)
     f_=cv2.resize(f_,(1000,400),interpolation=cv2.INTER_AREA)
     f_=cv2.cvtColor(f_,cv2.COLOR_GRAY2RGB)
-    assert f.shape==f_.shape,"Error f.shape"+str(f.shape)+str(f_.shape)
-    out.write(f_)
+    #assert f.shape==f_.shape,"Error f.shape"+str(f.shape)+str(f_.shape)
+    #out.write(f_)
     cv2.imshow('data', f_)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -99,8 +99,8 @@ for i in range(0,30,1):
     f_=np.concatenate((past_Frame,image,terrain),axis=1).astype(np.uint8)
     f_=cv2.resize(f_,(1000,400),interpolation=cv2.INTER_AREA)
     f_=cv2.cvtColor(f_,cv2.COLOR_GRAY2RGB)
-    assert f.shape==f_.shape,"Error f.shape"+str(f.shape)+str(f_.shape)
-    out.write(f_)
+    #assert f.shape==f_.shape,"Error f.shape"+str(f.shape)+str(f_.shape)
+    #out.write(f_)
     cv2.imshow('data', f_)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -128,8 +128,8 @@ for i in range(0,30,1):
     f_=np.concatenate((past_Frame,image,terrain),axis=1).astype(np.uint8)
     f_=cv2.resize(f_,(1000,400),interpolation=cv2.INTER_AREA)
     f_=cv2.cvtColor(f_,cv2.COLOR_GRAY2RGB)
-    assert f.shape==f_.shape,"Error f.shape"+str(f.shape)+str(f_.shape)
-    out.write(f_)
+    #assert f.shape==f_.shape,"Error f.shape"+str(f.shape)+str(f_.shape)
+    #out.write(f_)
     cv2.imshow('data', f_)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -157,8 +157,8 @@ for i in range(0,30,1):
     f_=np.concatenate((past_Frame,image,terrain),axis=1).astype(np.uint8)
     f_=cv2.resize(f_,(1000,400),interpolation=cv2.INTER_AREA)
     f_=cv2.cvtColor(f_,cv2.COLOR_GRAY2RGB)
-    assert f.shape==f_.shape,"Error f.shape"+str(f.shape)+str(f_.shape)
-    out.write(f_)
+    #assert f.shape==f_.shape,"Error f.shape"+str(f.shape)+str(f_.shape)
+    #out.write(f_)
     cv2.imshow('data', f_)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -186,11 +186,11 @@ for i in range(0,30,1):
     f_=np.concatenate((past_Frame,image,terrain),axis=1).astype(np.uint8)
     f_=cv2.resize(f_,(1000,400),interpolation=cv2.INTER_AREA)
     f_=cv2.cvtColor(f_,cv2.COLOR_GRAY2RGB)
-    assert f.shape==f_.shape,"Error f.shape"+str(f.shape)+str(f_.shape)
-    out.write(f_)
+    #assert f.shape==f_.shape,"Error f.shape"+str(f.shape)+str(f_.shape)
+    #out.write(f_)
     cv2.imshow('data', f_)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 cv2.destroyAllWindows()
-out.release() #uncomment to record video
+#out.release() #uncomment to record video
 exit()

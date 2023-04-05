@@ -431,24 +431,20 @@ class digiTip:
         if item<=0: return arr
         else: #if has number decrease the outside
             if y-1>=0:
-                
+                if arr[y-1][x]<2: arr[y-1][x]+=item-1
                 if arr[y-1][x]==0: 
-                    if arr[y-1][x]<5: arr[y-1][x]+=item-1
                     arr=self.expand(arr,x,y-1)
             if y+1<len(arr):
-                
+                if arr[y+1][x]<2: arr[y+1][x]+=item-1
                 if arr[y+1][x]==0:
-                    if arr[y+1][x]<5: arr[y+1][x]+=item-1
                     arr=self.expand(arr,x,y+1)
             if x+1<len(arr[0]):
-                
+                if arr[y][x+1]<2: arr[y][x+1]+=item-1
                 if arr[y][x+1]==0:
-                    if arr[y][x+1]<5: arr[y][x+1]+=item-1
                     arr=self.expand(arr,x+1,y)
             if x-1>=0:
-                
+                if arr[y][x-1]<2: arr[y][x-1]+=item-1
                 if arr[y][x-1]==0:
-                    if arr[y][x-1]<5: arr[y][x-1]+=item-1
                     arr=self.expand(arr,x-1,y)
         return arr
     def maskPush(self,arr,DIV=10):
