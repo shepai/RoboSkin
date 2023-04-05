@@ -83,6 +83,7 @@ class Skin: #skin object for detecting movement
         set the image for the digi tip
         @param image
         """
+        
         self.imF=copy.deepcopy(image)
     def getFrame(self):
         """
@@ -187,7 +188,9 @@ class Skin: #skin object for detecting movement
         image=self.getFrame()
         gray=image
         if len(image.shape)==3: gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        binary=image
         binary=self.adaptive(gray)
+        if type(self.imF)!=type(""): return binary
         to_Show,spots=self.removeBlob(binary,min_size = min_size)
         return spots.astype(np.uint8)
     def zero(self,iter=50):
@@ -403,7 +406,10 @@ class digiTip:
         self.grid=np.zeros(img.shape[0:2])
         self.h=100
         self.pos=startPos
+        """kernel = np.ones((2, 1), np.uint8)
+        img = cv2.erode(img, kernel, iterations=1)"""
         self.img=img
+        
     def lower(self,amount):
         self.h-=amount
     def getImage(self,env):
@@ -425,35 +431,47 @@ class digiTip:
         if item<=0: return arr
         else: #if has number decrease the outside
             if y-1>=0:
-                if arr[y-1][x]<5: arr[y-1][x]+=item-1
+                
                 if arr[y-1][x]==0: 
+                    if arr[y-1][x]<5: arr[y-1][x]+=item-1
                     arr=self.expand(arr,x,y-1)
             if y+1<len(arr):
-                if arr[y+1][x]<5: arr[y+1][x]+=item-1
+                
                 if arr[y+1][x]==0:
+                    if arr[y+1][x]<5: arr[y+1][x]+=item-1
                     arr=self.expand(arr,x,y+1)
             if x+1<len(arr[0]):
-                if arr[y][x+1]<5: arr[y][x+1]+=item-1
+                
                 if arr[y][x+1]==0:
+                    if arr[y][x+1]<5: arr[y][x+1]+=item-1
                     arr=self.expand(arr,x+1,y)
             if x-1>=0:
-                if arr[y][x-1]<5: arr[y][x-1]+=item-1
+                
                 if arr[y][x-1]==0:
+                    if arr[y][x-1]<5: arr[y][x-1]+=item-1
                     arr=self.expand(arr,x-1,y)
         return arr
-    def maskPush(self,arr,DIV=20):
+    def maskPush(self,arr,DIV=10):
         image=self.img.copy()[:,:,0]
         for i in range(0,arr.shape[0]-DIV,DIV):
             for j in range(0,arr.shape[1]-DIV,DIV):
                 k=np.sum(arr[i:i+DIV,j:j+DIV])/(DIV*DIV*10)
                 if k>0:
-                    k=(k/50)+1 #make larger than self
-                    image=self.blowUp(image,[DIV,DIV],[i,j],k=k)
+                    #k=int(k/10 +1) #make larger than self
+                    image=self.dilate(image,[DIV,DIV],[i,j],k=min(int(k),2))#self.blowUp(image,[DIV,DIV],[i,j],k=k)
         return image
     def moveX(self,units):
         self.pos[1]=units+self.pos[1]
     def moveY(self,units):
         self.pos[0]=units+self.pos[0]
+    def dilate(self,image,dims,pos,k):
+        area=image[pos[0]:pos[0]+dims[0],pos[1]:pos[1]+dims[1]]
+        kernel = np.ones((2,2), np.uint8)
+        area = cv2.dilate(area, kernel, iterations=k)
+        a=int((area.shape[0]-dims[0])/2)
+        b=int((area.shape[1]-dims[1])/2)
+        image[pos[0]:pos[0]+dims[0],pos[1]:pos[1]+dims[1]]=area[a:dims[0]+a,b:dims[1]+b]
+        return image
     def blowUp(self,image,dims,pos,k=1.2):
         area=image[pos[0]:pos[0]+dims[0],pos[1]:pos[1]+dims[1]]
         area=cv2.resize(area,(np.array(dims)*k).astype(int),interpolation=cv2.INTER_AREA)
