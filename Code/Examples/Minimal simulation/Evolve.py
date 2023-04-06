@@ -77,11 +77,12 @@ def runTrial(img,skin,T):
     dt=0.01
     t=0
     im_g,image=tap(tip,skin,env,image,past_Frame,SPLIT,SIZE) #get tap to know area
-
-    while t<T:
+    trial_over=False
+    while t<T and not trial_over:
         y=tip.pos[0]+tip.grid.shape[0]
         x=tip.pos[1]+tip.grid.shape[1]
         terrain=env[max(min(tip.pos[0],env.shape[0]),0):max(min(y,env.shape[0]),0),max(min(tip.pos[1],env.shape[1]),0):max(min(x,env.shape[1]),0)].copy()*5
+        if terrain.shape!=image.shape: trial_over=True
         f_=np.concatenate((im_g,image,terrain),axis=1).astype(np.uint8)
         f_=cv2.resize(f_,(1000,400),interpolation=cv2.INTER_AREA)
         f_=cv2.cvtColor(f_,cv2.COLOR_GRAY2RGB)
@@ -163,4 +164,4 @@ def runTrialD(img,skin,T):
         dire=getDir(skin,old_T,env,tip)
         t+=dt
 
-runTrialD(img,skin,5)
+runTrial(img,skin,5)
