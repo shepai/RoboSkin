@@ -475,6 +475,8 @@ class digiTip:
         b=int((area.shape[1]-dims[1])/2)
         image[pos[0]:pos[0]+dims[0],pos[1]:pos[1]+dims[1]]=area[a:dims[0]+a,b:dims[1]+b]
         return image
+    def setPos(self,x,y):
+        self.pos=[y,x]
     
 
 #C:/Users/dexte/github/Chaos-Robotics/Bio-inspired sensors/Tactip/Vid/Movement.mp4
