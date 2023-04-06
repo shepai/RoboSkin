@@ -59,7 +59,7 @@ for i in range(0,tip.h,10):
     e=env.get().copy()
     y=tip.pos[0]+tip.grid.shape[0]
     x=tip.pos[1]+tip.grid.shape[1]
-    terrain=env.get()[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)].copy()
+    terrain=env.get()[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)].copy()*5
     e[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)]=im
     #display all images
     #plt.imshow(e)
@@ -91,7 +91,7 @@ for i in range(0,30,1):
     e=env.get().copy()
     y=tip.pos[0]+tip.grid.shape[0]
     x=tip.pos[1]+tip.grid.shape[1]
-    terrain=env.get()[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)].copy()
+    terrain=env.get()[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)].copy()*5
     e[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)]=im
     #plt.imshow(e)
     #plt.title(str(i))
@@ -119,7 +119,7 @@ for i in range(0,30,1):
     e=env.get().copy()
     y=tip.pos[0]+tip.grid.shape[0]
     x=tip.pos[1]+tip.grid.shape[1]
-    terrain=env.get()[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)].copy()
+    terrain=env.get()[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)].copy()*5
     e[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)]=im
     #plt.imshow(e)
     #plt.title(str(i))
@@ -149,7 +149,7 @@ for i in range(0,30,1):
     e=env.get().copy()
     y=tip.pos[0]+tip.grid.shape[0]
     x=tip.pos[1]+tip.grid.shape[1]
-    terrain=env.get()[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)].copy()
+    terrain=env.get()[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)].copy()*5
     e[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)]=im
     #plt.imshow(e)
     #plt.title(str(i))
@@ -177,7 +177,7 @@ for i in range(0,30,1):
     e=env.get().copy()
     y=tip.pos[0]+tip.grid.shape[0]
     x=tip.pos[1]+tip.grid.shape[1]
-    terrain=env.get()[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)].copy()
+    terrain=env.get()[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)].copy()*5
     e[max(min(tip.pos[0],e.shape[0]),0):max(min(y,e.shape[0]),0),max(min(tip.pos[1],e.shape[1]),0):max(min(x,e.shape[1]),0)]=im
     #plt.imshow(e)
     #plt.title(str(i))
