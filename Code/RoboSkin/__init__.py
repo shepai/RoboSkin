@@ -447,7 +447,7 @@ class digiTip:
                 if arr[y][x-1]==0:
                     arr=self.expand(arr,x-1,y)
         return arr
-    def maskPush(self,arr,DIV=10):
+    def maskPush(self,arr,DIV=4):
         image=self.img.copy()[:,:,0]
         for i in range(0,arr.shape[0]-DIV,DIV):
             for j in range(0,arr.shape[1]-DIV,DIV):
