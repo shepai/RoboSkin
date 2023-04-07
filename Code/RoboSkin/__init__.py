@@ -61,6 +61,8 @@ class Skin: #skin object for detecting movement
         self.vid=videoFile #save viceo file
         self.centre=np.array(self.getFrame().shape[0:-1])//2 #get centre of frame
         self.startIm=None
+        self.init_im=self.getBinary()
+        #self.init_im=self.init_im//3
         self.origin=self.zero() #establish baseline
         self.last=self.origin.copy()
         self.thetas=np.zeros_like(self.last) #store distances
@@ -77,6 +79,7 @@ class Skin: #skin object for detecting movement
         self.begin=[]
         self.good_new=[]
         self.good_old=[]
+        
         self.p0 = cv2.goodFeaturesToTrack(past, mask = None, **feature_params)
     def setImage(self,image):
         """
@@ -310,14 +313,17 @@ class Skin: #skin object for detecting movement
         average=self.euclid(t1,t2)/len(t1)
         std=np.sqrt((self.euclid(t1**2,t2**2)/len(t1))-(average**2))
         return average/max(std,0.1)
-    def getForce(self,im,past,gridSize,threshold=50,image=None,degrade=1):
+    def getForce(self,im,gridSize,threshold=50,image=None,degrade=1,past=None):
         """
         Get the total force acting on different areas
         @param im image
         @param past image
         @param gridSize is how many segments to device the image (gridSizexgridSize)
         @param threshold ignores anything below
+        @param past either provides the past image or a new one
         """
+        if type(past)==type(None):
+            past=self.init_im
         im=cv2.absdiff(im,past) #get the difference between images
         if type(image)==type(None): image=np.zeros_like(im)
         else: 
@@ -333,7 +339,7 @@ class Skin: #skin object for detecting movement
             for d,j in enumerate(range(0,y,y_div)):
                     val=np.average(im[j:j+y_div,i:i+x_div])
                     if val>threshold:
-                        image[j:j+y_div,i:i+x_div]=val+150#get intensity of movement
+                        image[j:j+y_div,i:i+x_div]=val+50#get intensity of movement
                     if val!=0: #calculate average of filled in points
                         average+=val
                         num+=1
@@ -341,6 +347,42 @@ class Skin: #skin object for detecting movement
             image=image-(average//num) #subtract the light average
         image[image<0]=0
         return image
+    def getForceGrid(self,im,gridSize,threshold=50,image=None,degrade=1,past=None):
+        """
+        Get the total force acting on different areas return a nxn grid
+        @param im image
+        @param past image
+        @param gridSize is how many segments to device the image (gridSizexgridSize)
+        @param threshold ignores anything below
+        @param past either provides the past image or a new one
+        """
+        if type(past)==type(None):
+            past=self.init_im
+        im=cv2.absdiff(im,past) #get the difference between images
+        if type(image)==type(None): image=np.zeros_like(im)
+        else: 
+            image=image-degrade
+            image[image<0]=0
+        x=im.shape[1]
+        y=im.shape[0]
+        x_div=x//gridSize
+        y_div=y//gridSize
+        average=0
+        num=0
+        grid=np.zeros((gridSize,gridSize))
+        for c,i in enumerate(range(0,x,x_div)): #loop through grid space
+            for d,j in enumerate(range(0,y,y_div)):
+                    val=np.average(im[j:j+y_div,i:i+x_div])
+                    if val>threshold:
+                        image[j:j+y_div,i:i+x_div]=val+50#get intensity of movement
+                        grid[c][d]=val
+                    if val!=0: #calculate average of filled in points
+                        average+=val
+                        num+=1
+        if num!=0:
+            image=image-(average//num) #subtract the light average
+        image[image<0]=0
+        return image,grid
     def close(self):
         """
         close the camera/s
@@ -406,8 +448,8 @@ class digiTip:
         self.grid=np.zeros(img.shape[0:2])
         self.h=100
         self.pos=startPos
-        """kernel = np.ones((2, 1), np.uint8)
-        img = cv2.erode(img, kernel, iterations=1)"""
+        kernel = np.ones((1, 1), np.uint8)
+        img = cv2.erode(img, kernel, iterations=1)
         self.img=img
         
     def lower(self,amount):
@@ -447,14 +489,14 @@ class digiTip:
                 if arr[y][x-1]==0:
                     arr=self.expand(arr,x-1,y)
         return arr
-    def maskPush(self,arr,DIV=4):
+    def maskPush(self,arr,DIV=2):
         image=self.img.copy()[:,:,0]
         for i in range(0,arr.shape[0]-DIV,DIV):
             for j in range(0,arr.shape[1]-DIV,DIV):
-                k=np.sum(arr[i:i+DIV,j:j+DIV])/(DIV*DIV*10)
+                k=np.sum(arr[i:i+DIV,j:j+DIV])/(DIV*DIV*10)//2
                 if k>0:
                     #k=int(k/10 +1) #make larger than self
-                    image=self.dilate(image,[DIV,DIV],[i,j],k=min(int(k),2))#self.blowUp(image,[DIV,DIV],[i,j],k=k)
+                    image=self.dilate(image,[DIV,DIV],[i,j],k=min(int(k),3))#self.blowUp(image,[DIV,DIV],[i,j],k=k)
         return image
     def moveX(self,units):
         self.pos[1]=units+self.pos[1]
