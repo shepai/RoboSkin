@@ -21,7 +21,7 @@ out = cv2.VideoWriter('skinPressure.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, (w
 while(True):
     frame=skin.getFrame()
     im=skin.getBinary()
-    image=skin.getForce(im,past_Frame,SPLIT,image=image,threshold=50,degrade=20) #get the force push
+    image=skin.getForce(im,SPLIT,image=image,threshold=50,degrade=20,past=past_Frame) #get the force push
     past_Frame=im.copy() #get last frame
     tactile=np.zeros_like(new)
     tactile[:,:,2]=image #show push in red
@@ -31,6 +31,7 @@ while(True):
     cv2.imshow('unprocessed', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+    #print(type(np.concatenate((frame,tactile),axis=1)),np.concatenate((frame,tactile),axis=1).dtype)
     #out.write(np.concatenate((frame,tactile),axis=1)) #uncomment to record video
 skin.close()
 cv2.destroyAllWindows()
