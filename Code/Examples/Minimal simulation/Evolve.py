@@ -91,7 +91,7 @@ def runTrial(agent,img,skin,T):
         #if cv2.waitKey(1) & 0xFF == ord('q'):
         #    break
         #move
-        move=np.argmax(agent.forward(torch.tensor(grid.flatten())))
+        move=np.argmax(agent.forward(grid))
         if move==0: tip.moveX(5)
         elif move==1: tip.moveX(-5)
         elif move==2: tip.moveY(5)
@@ -115,7 +115,7 @@ def run(agent,population,generations=500,T=2):
     fitness_matrix=np.zeros((pop_size))
     overTime=np.zeros((generations,))
     gen=0
-    while gen < (generations) and overTime[max(gen-1,0)]<1:
+    while gen < (generations): #overTime[max(gen-1,0)]<1
         clear()
         print("Generation:",gen,"Fitness",overTime[max(gen-1,0)])
         #get mask to select genotypes for battle
@@ -136,12 +136,12 @@ def run(agent,population,generations=500,T=2):
             #tournament
             agent.set_genes(g1)
             f1=0
-            for i in range(3):
+            for j in range(3):
                 f1+=runTrial(agent,img,skin,T)
             f1/=3
             agent.set_genes(g1)
             f2=0
-            for i in range(3):
+            for j in range(3):
                 f2+=runTrial(agent,img,skin,T)
             f2/=3
             fitness_matrix[inds[i][0]]=f1
@@ -169,7 +169,8 @@ def run(agent,population,generations=500,T=2):
                 population[inds[old_index][1-genoWin]]=gen_genotype(shape=shape) #create new genotype
         overTime[gen]=np.max(fitness_matrix)
         gen+=1
-    return overTime
+    
+    return overTime,np.argmax(fitness_matrix)
 
 img = cv2.imread(path+'flat.png')
 shrink=(np.array(img.shape[0:2])//3).astype(int)
@@ -194,8 +195,13 @@ T=2
 SIZE=100
 pop=np.random.normal(0,3,(SIZE,sensor.num_genes))
 
-generations=1
-print(run(sensor,pop,generations))
+generations=500
+try:
+    fit,ind=run(sensor,pop,generations)
+except KeyboardInterrupt:
+    pass
 out.release()
 
+np.save("TacTipSim",pop[ind])
+np.save("TacTipSim_fitnesses",fit)
 cv2.destroyAllWindows()
