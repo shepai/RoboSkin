@@ -22,3 +22,4 @@ Robot leg provides the intrefacing with a Raspberry Pi Pico that is hooked up to
 ## Minimal simulation
 This example makes use of a virtual tactip and attempts to map simulated environmental information onto the tactip. Areas that come into contact with the surface will expand, as if it was getting closer to the camera. 
 
+<img width="30%" src="https://github.com/shepai/RoboSkin/blob/main/Assets/images/digiTip.gif">
