@@ -103,6 +103,18 @@ class Skin: #skin object for detecting movement
         if frame.shape[0]>500: #do not allow too large
             SF=480/frame.shape[0]
             frame = cv2.resize(frame, (int(frame.shape[1]*SF),480), interpolation = cv2.INTER_AREA)
+        lab= cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+        l_channel, a, b = cv2.split(lab)
+        # Applying CLAHE to L-channel
+        # feel free to try different values for the limit and grid size:
+        clahe = cv2.createCLAHE(clipLimit=10.0, tileGridSize=(8,8))
+        cl = clahe.apply(l_channel)
+
+        # merge the CLAHE enhanced L-channel with the a and b channel
+        limg = cv2.merge((cl,a,b))
+
+        # Converting image from LAB Color model to BGR color spcae
+        frame = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
         return frame
     def adaptive(self,img,threshold=150):
         """
@@ -125,7 +137,7 @@ class Skin: #skin object for detecting movement
         frame[frame>threshold]=255
         frame[frame<=threshold]=0
         return frame
-    def removeBlob(self,im,min_size = 300):
+    def removeBlob(self,im,min_size = 150):
         """
         @param im
         @param min_size defins the minimum size of the blobs otherwise delete them
