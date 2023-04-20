@@ -107,7 +107,7 @@ class Skin: #skin object for detecting movement
         l_channel, a, b = cv2.split(lab)
         # Applying CLAHE to L-channel
         # feel free to try different values for the limit and grid size:
-        clahe = cv2.createCLAHE(clipLimit=10.0, tileGridSize=(8,8))
+        clahe = cv2.createCLAHE(clipLimit=5.0, tileGridSize=(8,8))
         cl = clahe.apply(l_channel)
 
         # merge the CLAHE enhanced L-channel with the a and b channel
@@ -137,7 +137,7 @@ class Skin: #skin object for detecting movement
         frame[frame>threshold]=255
         frame[frame<=threshold]=0
         return frame
-    def removeBlob(self,im,min_size = 150):
+    def removeBlob(self,im,min_size = 200):
         """
         @param im
         @param min_size defins the minimum size of the blobs otherwise delete them
