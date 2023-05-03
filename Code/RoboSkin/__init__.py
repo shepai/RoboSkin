@@ -116,7 +116,7 @@ class Skin: #skin object for detecting movement
         # Converting image from LAB Color model to BGR color spcae
         frame = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
         return frame
-    def adaptive(self,img,threshold=150):
+    def adaptive(self,img,threshold=100):
         """
         get a threshold of pixels that maximizes the blobs
         @param img
@@ -196,7 +196,7 @@ class Skin: #skin object for detecting movement
                 temp.append(t[i])
         t=np.array(temp)
         return t
-    def getBinary(self,min_size = 300):
+    def getBinary(self,min_size = 300,adaptive=False):
         """
         get the binary image from the sensor and return only the white dots (filter out glare)
         """
@@ -204,7 +204,8 @@ class Skin: #skin object for detecting movement
         gray=image
         if len(image.shape)==3: gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         binary=image
-        binary=self.adaptive(gray)
+        if adaptive: binary=self.adaptive(gray)
+        else: binary=cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY)[1]
         if type(self.imF)!=type(""): return binary
         to_Show,spots=self.removeBlob(binary,min_size = min_size)
         return spots.astype(np.uint8)
@@ -248,7 +249,7 @@ class Skin: #skin object for detecting movement
             distances=self.euclid(eachPoint,arrayA,axis=1)#np.sqrt(np.sum(eachPoint-arrayA,axis=1)**2)
             min_dist=distances[np.argmin(distances)]
             ind=np.argmin(distances)
-            if ind not in used: #make sure within parameters
+            if ind not in used and distances[ind]<15: #make sure within parameters
                 looped[i]=arrayA[ind]
                 used.append(ind)
                 stored[ind]=[min_dist,i]
@@ -259,13 +260,13 @@ class Skin: #skin object for detecting movement
                     stored[ind]=[min_dist,i]
                     looped=self.loop_through(stored,used,looped,arrayA,arrayB,count+1,maxL=maxL)
         return looped
-    def movement(self,new,referenceArray=None,MAXD=10):
+    def movement(self,new,referenceArray=None,MAXD=8):
         """
         detect the movement of points using the new image
         @param new
         @param maxD is the maxdepth to search
         """
-        if type(referenceArray)==type(None): referenceArray=self.last.copy()
+        if type(referenceArray)==type(None): referenceArray=self.origin.copy()
         arrayA=new.copy()
         arrayB=referenceArray.copy()
         if len(new)>2: #check coords exist
@@ -351,7 +352,7 @@ class Skin: #skin object for detecting movement
             for d,j in enumerate(range(0,y,y_div)):
                     val=np.average(im[j:j+y_div,i:i+x_div])
                     if val>threshold:
-                        image[j:j+y_div,i:i+x_div]=val+50#get intensity of movement
+                        image[j:j+y_div,i:i+x_div]=val*2#get intensity of movement
                     if val!=0: #calculate average of filled in points
                         average+=val
                         num+=1
