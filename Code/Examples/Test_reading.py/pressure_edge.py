@@ -11,12 +11,7 @@ frame=skin.getFrame()
 old_T=skin.origin
 new=np.zeros_like(frame)
 SPLIT=5
-past_Frame=skin.getBinary()
-image=np.zeros_like(past_Frame)
 
-for i in range(10):
-    frame=skin.getFrame()
-    im=skin.getBinary()
 
 #uncomment to record video
 """p=np.concatenate((new,new),axis=1)
@@ -24,29 +19,33 @@ h, w = p.shape[:2]
 out = cv2.VideoWriter('skinDIrection.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, (w,h))"""
 def gatherT(string,n=5):
     DATA=[]
+    past_Frame=skin.getBinary()
+    image=np.zeros_like(past_Frame)
     time.sleep(1)
     for i in range(n):
         print(string,i+1)
         input("record> ")
-        frame=skin.getFrame()
-        im=skin.getBinary()
-        #image=skin.getForce(im,SPLIT,image=image,threshold=80,degrade=20,) #get the force push
-        im,grid=skin.getForceGrid(im,SPLIT,image=image,threshold=10,degrade=20,)
-        DATA.append(grid)
+        image=None
+        for i in range(10): #must loop through so image is not weird
+            im=skin.getBinary()
+            #image=skin.getForce(im,SPLIT,image=image,threshold=80,degrade=20,) #get the force push
+            image,grid=skin.getForceGrid(im,SPLIT,image=image,threshold=10,degrade=20)
+        DATA.append(image/(image.shape[0]*image.shape[1]))
+        past_Frame=image.copy
     return np.array(DATA)
 
 
-#a=np.zeros((5,5,25))
-for i in range(2):
+a=None
+for i in range(5):
     DATA=gatherT("Flat")
     DATA=DATA.reshape((len(DATA),DATA[0].flatten().shape[0]))
-    #a[i]=DATA.copy()
-    print(np.sum(DATA,axis=0).shape)
-    plt.plot([i+1 for i in range(len(DATA))],np.sum(DATA,axis=1),label="trial"+str(i+1))
+    if type(a)==type(None): a=np.zeros((5,5,DATA[0].shape[0]))
+    print(np.sum(DATA,axis=1))
+    plt.plot([i+1 for i in range(len(DATA))],np.sum(DATA,axis=1),label="Trial "+str(i+1))
 
-#np.save("/its/home/drs25/Documents/GitHub/RoboSkin/Code/Models/saved/pressureSaved/pressures1",a)
+np.save("/its/home/drs25/Documents/GitHub/RoboSkin/Code/Models/saved/pressureSaved/pressures",a)
 plt.legend(loc="upper left")
-plt.title("Scatter of average vector of different sensations for vectors")
+plt.title("Pressure applied to the TacTip over multiple trials")
 plt.xlabel("Pressure setting")
 plt.ylabel("Summed value of pressure image")
 plt.show()
