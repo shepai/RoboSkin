@@ -279,7 +279,8 @@ class Skin: #skin object for detecting movement
             for i, eachPoint in enumerate(arrayB): #fill in gaps
                 if np.sum(looped[i])==0:
                     looped[i]=eachPoint.copy()
-            if self.noiseRed(arrayB,looped): #if insignificant movement
+            if self.noiseRed(self.origin,looped): #if insignificant movement
+                self.last=self.origin.copy()
                 return arrayB
                 #self.last=self.origin.copy()
             self.last=looped.copy()
@@ -324,12 +325,13 @@ class Skin: #skin object for detecting movement
         @param t1 points
         @param t2 points
         """
-        all=self.euclid(t1,t2,axis=0)
+        all=self.euclid(t1,t2,axis=1)
         average=self.euclid(t1,t2)/len(t1)
         std=np.sqrt((self.euclid(t1**2,t2**2)/len(t1))-(average**2))
-        a=all[all>np.max(all)-average]
+
+        a=all[all>average+std]
         print(len(a))
-        return False if len(a)<self.origin.shape[0]//2 else True
+        return False if len(a)<1 else True
     def getForce(self,im,gridSize,threshold=50,image=None,degrade=1,past=None):
         """
         Get the total force acting on different areas
