@@ -330,7 +330,6 @@ class Skin: #skin object for detecting movement
         std=np.sqrt((self.euclid(t1**2,t2**2)/len(t1))-(average**2))
 
         a=all[all>average+std]
-        print(len(a))
         return False if len(a)<1 else True
     def getForce(self,im,gridSize,threshold=50,image=None,degrade=1,past=None):
         """
