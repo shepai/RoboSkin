@@ -232,7 +232,7 @@ class Skin: #skin object for detecting movement
         @axis is the axis you wish to calculate the distance on
         """
         return np.linalg.norm(a-b,axis=axis)
-    def loop_through(self,stored,used,looped,arrayA,arrayB,count,maxL=10):
+    def loop_through(self,stored,used,looped,arrayA,arrayB,count,maxL=10,dist=12):
         """
         Recursive method to find the closest points
         @param stored is the items that have been visited but can be again
@@ -240,8 +240,9 @@ class Skin: #skin object for detecting movement
         @param looped is the big array of point positions
         @param arrayA is the incoming points
         @param arrayB is the og points
-        @param count is a counter to preent infinite recusion 
+        @param count is a counter to preent infinite recursion 
         @param maxL is the maximum level it will search
+        @param dist is the parameter that removes shapes over a crtain distance
         """
         if count==maxL:
             return looped
@@ -249,7 +250,7 @@ class Skin: #skin object for detecting movement
             distances=self.euclid(eachPoint,arrayA,axis=1)#np.sqrt(np.sum(eachPoint-arrayA,axis=1)**2)
             min_dist=distances[np.argmin(distances)]
             ind=np.argmin(distances)
-            if ind not in used and distances[ind]<15: #make sure within parameters
+            if ind not in used and distances[ind]<dist: #make sure within parameters
                 looped[i]=arrayA[ind]
                 used.append(ind)
                 stored[ind]=[min_dist,i]

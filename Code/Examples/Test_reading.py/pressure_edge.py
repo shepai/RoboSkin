@@ -25,30 +25,71 @@ def gatherT(string,n=5):
     for i in range(n):
         print(string,i+1)
         input("record> ")
-        image=None
+        grid=None
         for i in range(10): #must loop through so image is not weird
             im=skin.getBinary()
             #image=skin.getForce(im,SPLIT,image=image,threshold=80,degrade=20,) #get the force push
             image,grid=skin.getForceGrid(im,SPLIT,image=image,threshold=10,degrade=20)
-        DATA.append(image/(image.shape[0]*image.shape[1]))
+        DATA.append(grid)
         past_Frame=image.copy
     return np.array(DATA)
 
+p={}
+for i in range(SPLIT):
+    for j in range(SPLIT):
+        p["field "+str(i+1)+","+str(j+1)]=[]
 
-a=None
-for i in range(5):
+NUM=3
+a=np.zeros((5,SPLIT**2))
+for i in range(NUM):
     DATA=gatherT("Flat")
     DATA=DATA.reshape((len(DATA),DATA[0].flatten().shape[0]))
-    if type(a)==type(None): a=np.zeros((5,5,DATA[0].shape[0]))
-    print(np.sum(DATA,axis=1))
-    plt.plot([i+1 for i in range(len(DATA))],np.sum(DATA,axis=1),label="Trial "+str(i+1))
+    a+=DATA
 
-np.save("/its/home/drs25/Documents/GitHub/RoboSkin/Code/Models/saved/pressureSaved/pressures",a)
+a=a/NUM
+for j in range(len(a)):
+    for i,key in enumerate(p):
+        ar=p[key]
+        ar.append(a[j][i])
+
+#purge receptive fields of blank
+p_=p.copy()
+for key in p_:
+    if sum(p_[key])==0: 
+        del p[key]
+    
+classes= ("Pressure 1", "Pressure 2", "Pressure 3","Pressure 4","Pressure 5")
+
+
+x = np.arange(len(classes))  # the label locations
+width = 0.1  # the width of the bars
+multiplier = 0
+
+fig, ax = plt.subplots(layout='constrained')
+
+for attribute, measurement in p.items():
+    offset = width * multiplier
+    rects = ax.bar(x + offset, measurement, width, label=attribute)
+    #ax.bar_label(rects, padding=3)
+    multiplier += 1
+
+# Add some text for labels, title and custom x-axis tick labels, etc.
+ax.set_ylabel('Summed value of pressure')
+ax.set_title('Pressure applied to the TacTip on receptive fields')
+ax.set_xticks(x + width, classes)
+ax.legend(loc='upper left', ncols=3)
+ax.set_ylim(0, 100)
+
+plt.show()
+
+"""
+np.save("/its/home/drs25/Documents/GitHub/RoboSkin/Code/Models/saved/pressureSaved/pressures1",a)
 plt.legend(loc="upper left")
 plt.title("Pressure applied to the TacTip over multiple trials")
 plt.xlabel("Pressure setting")
 plt.ylabel("Summed value of pressure image")
 plt.show()
+"""
 
 """NUM=2
 ar=np.zeros((3,NUM,5,2))
