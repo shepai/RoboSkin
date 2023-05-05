@@ -232,7 +232,7 @@ class Skin: #skin object for detecting movement
         @axis is the axis you wish to calculate the distance on
         """
         return np.linalg.norm(a-b,axis=axis)
-    def loop_through(self,stored,used,looped,arrayA,arrayB,count,maxL=10,dist=12):
+    def loop_through(self,stored,used,looped,arrayA,arrayB,count,maxL=20,dist=12):
         """
         Recursive method to find the closest points
         @param stored is the items that have been visited but can be again
@@ -267,7 +267,7 @@ class Skin: #skin object for detecting movement
         @param new
         @param maxD is the maxdepth to search
         """
-        if type(referenceArray)==type(None): referenceArray=self.origin.copy()
+        if type(referenceArray)==type(None): referenceArray=self.last.copy()
         arrayA=new.copy()
         arrayB=referenceArray.copy()
         if len(new)>2: #check coords exist
@@ -279,10 +279,10 @@ class Skin: #skin object for detecting movement
             for i, eachPoint in enumerate(arrayB): #fill in gaps
                 if np.sum(looped[i])==0:
                     looped[i]=eachPoint.copy()
-            if self.noiseRed(arrayB,looped)<0.028: #if insignificant movement
+            if self.noiseRed(arrayB,looped): #if insignificant movement
                 return arrayB
                 #self.last=self.origin.copy()
-            #self.last=looped.copy()
+            self.last=looped.copy()
             return looped
         else:
             return arrayB
@@ -324,9 +324,12 @@ class Skin: #skin object for detecting movement
         @param t1 points
         @param t2 points
         """
+        all=self.euclid(t1,t2,axis=0)
         average=self.euclid(t1,t2)/len(t1)
         std=np.sqrt((self.euclid(t1**2,t2**2)/len(t1))-(average**2))
-        return average/max(std,0.1)
+        a=all[all>average]
+        print(len(a))
+        return False if len(a)<self.origin.shape[0]//2 else True
     def getForce(self,im,gridSize,threshold=50,image=None,degrade=1,past=None):
         """
         Get the total force acting on different areas
