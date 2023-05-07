@@ -287,6 +287,10 @@ class Skin: #skin object for detecting movement
             return looped
         else:
             return arrayB
+    def reset(self):
+        self.origin=self.zero()
+        self.last=self.origin.copy()
+
     def opticFlow(self,past,next):
         """
         Calculate the optic flow image
