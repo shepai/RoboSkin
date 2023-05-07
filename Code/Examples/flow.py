@@ -43,7 +43,8 @@ while(True):
     if q & 0xFF == ord('q'):
         break
     elif q & 0xFF == ord('r'):
-        skin.origin=skin.zero()
+        skin.reset()
+        old_T=skin.origin
 
     """fig, axis = plt.subplots(1,3, figsize=(3.5, 2.0))
 
