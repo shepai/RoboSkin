@@ -41,7 +41,7 @@ for j in range(NUM):
     plt.scatter(av[:,0],av[:,1],c=weights, cmap='Purples',label="Central")
     ar[0][j]=av.copy()
     input("get off>")
-    skin.origin=skin.zero()
+    skin.reset()
     old_T=skin.origin
     print("ORIGIN>",old_T.shape)
     DATA=gatherT(skin,"EdgeL")
@@ -52,7 +52,7 @@ for j in range(NUM):
     plt.scatter(av[:,0],av[:,1],c=weights, cmap='Greens',label="Top")
     ar[1][j]=av.copy()
     input("get off>")
-    skin.origin=skin.zero()
+    skin.reset()
     old_T=skin.origin
     print("ORIGIN>",old_T.shape)
     DATA=gatherT(skin,"EdgeR")
@@ -63,7 +63,7 @@ for j in range(NUM):
     plt.scatter(av[:,0],av[:,1],c=weights, cmap='Reds',label="Bottom")
     ar[2][j]=av.copy()
     input("get off>")
-    skin.origin=skin.zero()
+    skin.reset()
     old_T=skin.origin
     print("ORIGIN>",old_T.shape)
     
