@@ -4,6 +4,7 @@ import RoboSkin as sk
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import random
 
 path= letRun.path
 
@@ -12,10 +13,10 @@ path= letRun.path
 """p=np.concatenate((new,new),axis=1)
 h, w = p.shape[:2]
 out = cv2.VideoWriter('skinDIrection.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, (w,h))"""
-def gatherT(file,string,n=3): #number of cm
+def gatherT(file,string,n=5): #number of cm
     skin=sk.Skin(videoFile=path+file) #videoFile=path+"Movement4.avi"
     old_T=skin.origin
-    for i in range(5):
+    for i in range(random.randint(20,50)):
         im=skin.getBinary()
     DATA=[]
     past_Frame=skin.getBinary()
@@ -23,34 +24,42 @@ def gatherT(file,string,n=3): #number of cm
         im=skin.getBinary()
         t_=skin.getDots(im)
         t=skin.movement(t_)
+
         DATA.append(t.copy())
     np.array(DATA)
     av=np.zeros((len(DATA),))
     for i,dat in enumerate(DATA):
         av[i]=np.linalg.norm(old_T-dat)
-    dist=np.sum(av)/len(av)
+    dist=np.sum(av)#/len(av)
     skin.close()
     return dist
 
-sample=4
-modes=["Movement4.avi","Movement3.avi","Movement2.avi","Movement1.mp4"]
-print("Obstacle 1")
-speeds=[]
-for i in range(sample):
-    print(modes[i])
-    d=gatherT(modes[i],"speed"+str(i))
-    speeds.append(d)
+exps=10
+av=np.zeros((4))
+for j in range(10):
+    sample=4
+    modes=["speed1.avi","speed2.avi","speed3.avi","speed4.avi"]
+    print("Obstacle ",j)
+    speeds=[]
 
-plt.plot([(i+1)/2 for i in range(sample)],speeds,c="b")
+    for i in range(sample):
+        print(modes[i])
+        d=gatherT(modes[i],"speed"+str(i))
+        speeds.append(d)
+    av+=np.array(speeds)
+    plt.plot([(i+1)/2 for i in range(sample)],speeds,label="Exp"+str(j))
 
+av=av/exps
+plt.plot([(i+1)/2 for i in range(sample)],av,'--',label="Average")
 
 """print("Obstacle 2")
 for i in range(sample):
     d=gatherT("..")
     plt.plot([(i+1)/2 for i in range(2*2)],d,c="r")"""
 
-plt.xlabel("Pressure setting")
+plt.xlabel("Speed setting")
 plt.ylabel("Average magnitude size (px)")
-plt.title("How speed affects the magnitude of vectors")
+plt.title("How speed affects the time of arrival to the magnitude of vectors")
+plt.legend(loc="lower left")
 plt.show()
 
