@@ -18,16 +18,16 @@ c=0
 ex=Experiment(B)
 #ex.moveZ(1,1)
 samples=1
-samples_2=2
-data=np.zeros((samples,3,samples_2,2))
-
+speeds=[10,20,30,40]
+data=np.zeros((samples,len(speeds)))
 for i in range(samples):
     print("Trial:",i+1)
-    f=ex.test_speed(samples_2,[10,20,30,40])
+    f=ex.test_speed(speeds)
     #save to main data
-    data[i][0]=f
-    weights = np.arange(1, samples_2+1)
-    plt.scatter(f[:,0],f[:,1],c=weights, cmap='Purples')
+    data[i]=f
+    weights = np.arange(1, len(speeds)+1)
+    print(f.shape,speeds)
+    plt.plot(speeds,f,label="Exp"+str(i))
 
 
 #plot the labels
@@ -35,9 +35,11 @@ for i in range(samples):
 plt.scatter(l[:,0],l[:,1],c=weights, cmap='Greens',label="Top")
 plt.scatter(r[:,0],r[:,1],c=weights, cmap='Reds',label="Bottom")
 plt.legend(loc="upper right")"""
-plt.colorbar()
-plt.title("Scatter of average vector of different sensations for vectors")
+plt.xlabel("Speed setting")
+plt.ylabel("Average magnitude size (px)")
+plt.title("How speed affects the time of arrival to the magnitude of vectors")
+plt.legend(loc="lower left")
 plt.show()
 
-np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/dirs",data)
+np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speeds",data)
 
