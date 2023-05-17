@@ -368,6 +368,7 @@ class Skin: #skin object for detecting movement
         if num!=0:
             image=image-(average//num) #subtract the light average
         image[image<0]=0
+        image[image>255]=255
         return image
     def getForceGrid(self,im,gridSize,threshold=50,image=None,degrade=1,past=None):
         """
@@ -404,6 +405,7 @@ class Skin: #skin object for detecting movement
         if num!=0:
             image=image-(average//num) #subtract the light average
         image[image<0]=0
+        image[image>255]=255
         return image,grid
     def close(self):
         """
