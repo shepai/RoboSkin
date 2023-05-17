@@ -5,6 +5,7 @@ import sys
 import glob
 import letRun #This library can be deleted, it is used for debugging
 import RoboSkin as sk
+import numpy as np
 
 """
 Setup control with micropython device
@@ -63,8 +64,53 @@ class Board:
         self.COM.close()
 
 class Experiment:
-    def __init__(self,board)
+    #17 steps = 1cm on z axis
+    def __init__(self,board,device=1,split=5):
         self.b=board
+        self.path = letRun.path
+        self.skin=sk.Skin(device=device) #load skin object using demo video
+        self.frame=self.skin.getFrame()
+        self.old_T=self.skin.origin
+        self.SPLIT=split
+        self.dist=-1
+        self.image=np.zeros_like(self.skin.getBinary())
+        #zero
+        for i in range(50):
+            im=self.skin.getBinary()
+            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,) #get the force push
+    def move_till_touch(self):
+        not_touched=True
+        while not_touched:
+            im=self.skin.getBinary()
+            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,) #get the force push
+            tactile=np.zeros_like(self.frame)
+            tactile[:,:,2]=self.image #show push in red
+            self.b.moveZ(-1) #move down
+            #print(np.sum(tactile)/(self.SPLIT*self.SPLIT*255))
+            if np.sum(tactile)/(self.SPLIT*self.SPLIT*255) > 3: #if touched
+                not_touched=False
+    def run_edge(self):
+        pass
+    def moveZ(self,cm,dir): #dir must be 1 or -1
+        assert dir==1 or dir==-1, "Incorrect direction, must be 1 or -1"
+        cm=cm*17 #17 steps per cm
+        for i in range(0,round(cm)):
+            ex.b.moveZ(1*dir) #move up
+    def run_pressure(self,cm_samples=2,step=0.5):
+        a=[]
+        self.move_till_touch() #be touching the platform
+        for i in np.arange(0, cm_samples, step):
+            im=self.skin.getBinary()
+            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,) #get the force push
+            time.sleep(1)
+            self.moveZ(i,-1) #move down
+            time.sleep(1)
+            im=self.skin.getBinary()
+            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,) #get the force push
+            a.append(np.sum(self.image)/(self.SPLIT*self.SPLIT*255))
+            self.moveZ(i,1) #move back
+        return a
+
 
 B=Board()
 #get serial boards and connect to first one
@@ -79,6 +125,7 @@ while COM=="":
     except IndexError:
         time.sleep(1)
 
-B.moveZ(10)
-time.sleep(1)
-B.moveZ(-10)
+ex=Experiment(B)
+ex.moveZ(1,1)
+a=ex.run_pressure()
+print(a)
