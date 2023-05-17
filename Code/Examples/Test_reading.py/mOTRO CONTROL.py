@@ -26,10 +26,10 @@ class Move:
             
         self.board.motorOff(1)
 b=Move()
-b.moveZ(-5)
+"""b.moveZ(-5)
 utime.sleep(3)
 b.moveZ(5)
 
 b.moveX(-5)
 utime.sleep(3)
-b.moveX(5)
+b.moveX(5)"""
