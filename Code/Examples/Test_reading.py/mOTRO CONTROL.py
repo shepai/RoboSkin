@@ -6,12 +6,12 @@ class Move:
         self.board=PicoRobotics.KitronikPicoRobotics()
         self.speed=speed
         self.board.motorOff(1)
-    def moveZ(self,num):
+    def moveZ(self,num,speed=20):
         direction="f"
         if num<0:
             direction="r"
         for step in range(abs(num)):
-            self.board.step(2,direction,self.speed)
+            self.board.step(2,direction,speed)
     def moveX(self,num,stopFunc=None):
         direction="f"
         if num<0:
