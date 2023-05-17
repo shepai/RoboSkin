@@ -73,21 +73,22 @@ class Experiment:
         self.old_T=self.skin.origin
         self.SPLIT=split
         self.dist=-1
-        self.image=np.zeros_like(self.skin.getBinary())
+    def move_till_touch(self,im__=None):
+        not_touched=True
         #zero
+        self.image=np.zeros_like(self.skin.getBinary())
         for i in range(50):
             im=self.skin.getBinary()
-            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,) #get the force push
-    def move_till_touch(self):
-        not_touched=True
-        while not_touched:
+            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=im__) #get the force push
+        while not_touched: #loop till touching surface
             im=self.skin.getBinary()
-            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,) #get the force push
+            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=im__) #get the force push
             tactile=np.zeros_like(self.frame)
             tactile[:,:,2]=self.image #show push in red
             self.b.moveZ(-1) #move down
             #print(np.sum(tactile)/(self.SPLIT*self.SPLIT*255))
-            if np.sum(tactile)/(self.SPLIT*self.SPLIT*255) > 3: #if touched
+            print(np.sum(tactile)/(self.SPLIT*self.SPLIT*255))
+            if np.sum(tactile)/(self.SPLIT*self.SPLIT*255) > 2: #if touched
                 not_touched=False
     def run_edge(self):
         pass
@@ -95,37 +96,23 @@ class Experiment:
         assert dir==1 or dir==-1, "Incorrect direction, must be 1 or -1"
         cm=cm*17 #17 steps per cm
         for i in range(0,round(cm)):
-            ex.b.moveZ(1*dir) #move up
+            self.b.moveZ(1*dir) #move up
     def run_pressure(self,cm_samples=2,step=0.5):
         a=[]
-        self.move_till_touch() #be touching the platform
+        Image=self.skin.getBinary() #get initial image
+        self.move_till_touch(Image) #be touching the platform
         for i in np.arange(0, cm_samples, step):
             im=self.skin.getBinary()
-            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,) #get the force push
+            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=Image) #get the force push
             time.sleep(1)
             self.moveZ(i,-1) #move down
             time.sleep(1)
             im=self.skin.getBinary()
-            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,) #get the force push
+            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=Image) #get the force push
             a.append(np.sum(self.image)/(self.SPLIT*self.SPLIT*255))
             self.moveZ(i,1) #move back
+        self.moveZ(2,1) #move back
         return a
 
 
-B=Board()
-#get serial boards and connect to first one
-COM=""
-while COM=="":
-    try:
-        res=B.serial_ports()
-        print("ports:",res)
-        B.connect(res[0])
-        B.runFile("C:/Users/dexte/github/RoboSkin/Code/Examples/Test_reading.py/mOTRO CONTROL.py")
-        COM=res[0]
-    except IndexError:
-        time.sleep(1)
 
-ex=Experiment(B)
-ex.moveZ(1,1)
-a=ex.run_pressure()
-print(a)
