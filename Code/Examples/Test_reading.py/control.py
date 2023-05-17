@@ -89,13 +89,58 @@ class Experiment:
             #print(np.sum(tactile)/(self.SPLIT*self.SPLIT*255))
             if np.sum(tactile)/(self.SPLIT*self.SPLIT*255) > 2: #if touched
                 not_touched=False
-    def run_edge(self):
-        pass
+    def read_vectors(self,old_T):
+        im=self.skin.getBinary()
+        t_=self.skin.getDots(im)
+        t=self.skin.movement(t_)
+        return old_T-t
+    def run_edge(self,num_samples,flat=True,left=True,right=True):
+        a=[]
+        self.skin.reset()
+        old_T=self.skin.origin
+        #self.move_till_touch(Image) #be touching the platform
+        fl_dt=np.zeros((num_samples,2))
+        l_dt=np.zeros((num_samples,2))
+        r_dt=np.zeros((num_samples,2))
+        if flat:
+            for i in range(num_samples):
+                self.moveZ(0.5,-1) #move down
+                vectors=self.read_vectors(old_T)
+                fl_dt[i]=np.sum(vectors,axis=0)/len(vectors)
+                time.sleep(1)
+                self.moveZ(0.5,1) #move up
+                time.sleep(1)
+        if left:
+            for i in range(num_samples):
+                self.moveZ(0.5,-1) #move down
+                self.moveX(1,-1)
+                vectors=self.read_vectors(old_T)
+                l_dt[i]=np.sum(vectors,axis=0)/len(vectors)
+                time.sleep(1)
+                self.moveZ(0.5,1) #move up
+                self.moveX(1,1)
+                time.sleep(1)
+        if right:
+            for i in range(num_samples):
+                self.moveZ(0.5,-1) #move down
+                self.moveX(1,1)
+                vectors=self.read_vectors(old_T)
+                r_dt[i]=np.sum(vectors,axis=0)/len(vectors)
+                time.sleep(1)
+                self.moveZ(0.5,1) #move up
+                self.moveX(1,-1)
+                time.sleep(1)
+        return fl_dt,l_dt,r_dt
     def moveZ(self,cm,dir): #dir must be 1 or -1
         assert dir==1 or dir==-1, "Incorrect direction, must be 1 or -1"
         cm=cm*17 #17 steps per cm
         for i in range(0,round(cm)):
             self.b.moveZ(1*dir) #move up
+    def moveX(self,cm,dir): #dir must be 1 or -1
+        assert dir==1 or dir==-1, "Incorrect direction, must be 1 or -1"
+        cm=cm*26 #26 steps per cm
+        for i in range(0,round(cm)):
+            self.b.moveX(1*dir) #move up
     def run_pressure(self,cm_samples=2,step=0.5):
         a=[]
         Image=self.skin.getBinary() #get initial image
