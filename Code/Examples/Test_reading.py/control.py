@@ -87,7 +87,6 @@ class Experiment:
             tactile[:,:,2]=self.image #show push in red
             self.b.moveZ(-1) #move down
             #print(np.sum(tactile)/(self.SPLIT*self.SPLIT*255))
-            print(np.sum(tactile)/(self.SPLIT*self.SPLIT*255))
             if np.sum(tactile)/(self.SPLIT*self.SPLIT*255) > 2: #if touched
                 not_touched=False
     def run_edge(self):
