@@ -4,8 +4,11 @@ from pygame_widgets.slider import Slider
 from pygame_widgets.textbox import TextBox
 from control import Board
 import time
-
+import RoboSkin as sk
+import cv2
+import numpy as np
 B=Board()
+skin=sk.Skin(device=1)
 #get serial boards and connect to first one
 COM=""
 while COM=="":
@@ -20,7 +23,7 @@ while COM=="":
 
 
 pygame.init()
-(width, height) = (640, 480)
+(width, height) = (1000, 600)
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption('TacTip frame control software')
 running = True
@@ -45,6 +48,13 @@ output.disable()  # Act as label instead of textbox
 
 currentVal=50
 currentValZ=50
+
+#initial variables for skin reading
+past_Frame=skin.getBinary()
+old_T=skin.origin
+image=np.zeros_like(past_Frame)
+SPLIT=10
+
 while running:
     events=pygame.event.get()
     for event in events:
@@ -65,5 +75,48 @@ while running:
     output.setText(slider.getValue())
     outputZ.setText(sliderZ.getValue())
     screen.fill(background_colour)
+
+    #display tactip imagery
+    frame=skin.getFrame()
+    img=frame.copy()
+    scale_percent=40
+    width = int(img.shape[1] * scale_percent / 100)
+    height = int(img.shape[0] * scale_percent / 100)
+    dim = (width, height)
+    resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+    surf = pygame.surfarray.make_surface(resized)
+    
+    screen.blit(surf, (550, 0))
+    #display direction
+    im=skin.getBinary()
+    new=np.ones_like(frame) * 255
+    t_=skin.getDots(im)
+    t=skin.movement(t_)
+    v=np.zeros(t.shape)
+    if t.shape[0]>2:
+        new[t[:,0],t[:,1]]=(0,255,0)
+        new[old_T[:,0],old_T[:,1]]=(0,0,255)
+        for i,coord in enumerate(t): #show vectors of every point
+            x1=coord[1]
+            y1=coord[0]
+            x2=old_T[i][1]
+            y2=old_T[i][0]
+            #cv2.putText(new,str(i),(x1,y1),cv2.FONT_HERSHEY_SIMPLEX,0.2,(0,255,0))
+            #d=skin.euclid(np.array([x1, y1]), np.array([x2, y2]))
+            v[i] =np.array([x1-x2,y1-y2])
+            cv2.arrowedLine(new, (x2, y2), (x1, y1), (0, 0, 0), thickness=2)#
+
+    resized = cv2.resize(new, dim, interpolation = cv2.INTER_AREA)
+    surf = pygame.surfarray.make_surface(resized)
+    screen.blit(surf, (550+height+50, 0))
+
+    #dislpay force
+    image=skin.getForce(im,SPLIT,image=image,threshold=20,degrade=20,) #get the force push
+    tactile=np.zeros_like(new)
+    tactile[:,:,2]=image #show push in red
+    resized = cv2.resize(tactile, dim, interpolation = cv2.INTER_AREA)
+    surf = pygame.surfarray.make_surface(resized)
+    screen.blit(surf, (550, width+50))
+
     pygame_widgets.update(events)
     pygame.display.update()
