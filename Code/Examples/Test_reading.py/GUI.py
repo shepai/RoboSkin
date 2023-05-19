@@ -49,9 +49,13 @@ outputZ = TextBox(screen, 450, 200, 50, 50, fontSize=30)
 output.disable()  # Act as label instead of textbox
 
 def speed():
-    screen.fill(background_colour)
-    pygame.display.update()
-
+    global mode
+    global outer_i
+    global outer_j
+    
+    outer_i=0
+    outer_j=0
+    mode="speed"
 
 def pressure():
     global mode
@@ -148,6 +152,7 @@ outer_j=0
 mode="menu"
 samples=2
 trials=1
+speeds=[10,20,30]
 a=[]
 Image=None
 
@@ -157,6 +162,7 @@ scale_percent=40
 width = int(img.shape[1] * scale_percent / 100)
 height = int(img.shape[0] * scale_percent / 100)
 dim = (width, height)
+
 
 while running:
     events=pygame.event.get()
@@ -216,10 +222,32 @@ while running:
             exp.moveZ(2,1) #move back
     elif mode=="speed":
         #speed experiment
-        if outer_j==samples: #simulated for loop
+        if outer_j==0:
+            exp.skin.reset()
+            #self.moveX(1,-1)
+            old_T=exp.skin.origin
+            sho_()
+        if outer_j==len(speeds): #simulated for loop
             outer_j=0
             outer_i+=1
-            
+            exp.b.setSpeed(20)
+        sp=speeds[outer_j]
+        exp.b.setSpeed(sp)
+        sho_()
+        exp.moveZ(0.5,-1) #move down
+        sho_()
+        exp.moveX(0.5-(outer_j/10),1)
+        sho_()
+        vectors=exp.read_vectors(old_T)
+        #r_dt[j]=np.sum(np.linalg.norm(vectors))
+        time.sleep(1)
+        exp.moveZ(0.5,1) #move up
+        sho_()
+        exp.moveX(0.5-(outer_j/10),-1)
+        sho_()
+        time.sleep(1)
+        sho_()
+
         outer_j+=1
         if outer_i==trials: #finished loop
             mode="menu"
@@ -227,6 +255,7 @@ while running:
             outer_j=0
             print(a)
             a=[]
+            exp.b.setSpeed(20)
     elif mode=="edges":
         #edges experiment
         if outer_j==samples: #simulated for loop
