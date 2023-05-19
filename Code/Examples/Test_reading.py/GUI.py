@@ -100,6 +100,13 @@ def sho_():
         pygame_widgets.update(events)
     pygame.display.update()
 
+def save(id): #save the data if it has beenritten to
+    if id=="speed" and np.sum(data_speed)!=0:
+        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speed",data_speed)
+    if id=="pressure" and np.sum(data_pressure)!=0:
+        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/pressure",data_pressure)
+    if id=="edge" and np.sum(data_edge)!=0:
+        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/edges",data_edge)
 #create buttons for experiments
 b1 = Button(
     screen, 100, 400, 140, 25, text='Speed experiment',
@@ -110,6 +117,17 @@ b1 = Button(
             
          )
 
+b1_save = Button(
+    screen, 260, 400, 80, 25, text='Save',
+            fontSize=20, margin=20,
+            inactiveColour=(255, 0, 0),
+            pressedColour=(0, 255, 0), radius=20,
+            onClick=lambda: save("speed")
+            
+         )
+
+
+
 b2 = Button(
     screen, 100, 430, 140, 25, text='Pressure experiment',
             fontSize=20, margin=20,
@@ -119,12 +137,30 @@ b2 = Button(
             
          )
 
+b2_save = Button(
+    screen, 260, 430, 80, 25, text='Save',
+            fontSize=20, margin=20,
+            inactiveColour=(255, 0, 0),
+            pressedColour=(0, 255, 0), radius=20,
+            onClick=lambda: save("pressure")
+            
+         )
+
 b3 = Button(
     screen, 100, 460, 140, 25, text='Direction experiment',
             fontSize=20, margin=20,
             inactiveColour=(255, 0, 0),
             pressedColour=(0, 255, 0), radius=20,
             onClick=lambda: change_mode("edges")
+            
+         )
+
+b3_save = Button(
+    screen, 260, 460, 80, 25, text='Save',
+            fontSize=20, margin=20,
+            inactiveColour=(255, 0, 0),
+            pressedColour=(0, 255, 0), radius=20,
+            onClick=lambda: save("edges")
             
          )
 currentVal=50
@@ -139,7 +175,7 @@ SPLIT=10
 outer_i=0
 outer_j=0
 mode="menu"
-samples=2
+samples=1
 trials=1
 speeds=[10,20,30]
 a=[]
@@ -151,9 +187,19 @@ scale_percent=40
 width = int(img.shape[1] * scale_percent / 100)
 height = int(img.shape[0] * scale_percent / 100)
 dim = (width, height)
-
+CM=1.5
+ST=0.5
+#data storage
+data_speed=np.zeros((samples,len(speeds)))
+data_edge=np.zeros((samples,3,samples,2))
+data_pressure=np.zeros((samples,len(np.arange(0, CM, ST))))
 
 while running:
+    #add colouring if data exists
+    if np.sum(data_speed)!=0: b1_save.inactiveColour=(0,255,0)
+    if np.sum(data_pressure)!=0: b2_save.inactiveColour=(0,255,0)
+    if np.sum(data_edge)!=0: b3_save.inactiveColour=(0,255,0)
+
     events=pygame.event.get()
     for event in events:
         if event.type == pygame.QUIT:
@@ -162,13 +208,13 @@ while running:
         val=slider.getValue()
         if val!=currentVal: #change
             mov=val-currentVal
-            print("Move by:",mov)
+            #print("Move by:",mov)
             currentVal=val
             B.moveX(mov)
         val=sliderZ.getValue()
         if val!=currentValZ: #change
             mov=val-currentValZ
-            print("Move by:",mov)
+            #print("Move by:",mov)
             currentValZ=val
             B.moveZ(mov)
         output.setText(slider.getValue())
@@ -181,14 +227,10 @@ while running:
 
     if mode=="pressure":
         #pressure experiment
-        print(outer_j)
         if outer_j==0: #first trial
             Image=exp.skin.getBinary() #get initial image
             exp.move_till_touch(Image) #be touching the platform
             sho_()
-        if outer_j==samples: #simulated for loop
-            outer_j=0
-            outer_i+=1
         im=exp.skin.getBinary()
         exp.image=exp.skin.getForce(im,exp.SPLIT,image=exp.image,threshold=20,degrade=20,past=Image) #get the force push
         sho_()
@@ -201,13 +243,16 @@ while running:
         a.append(np.sum(exp.image)/(exp.SPLIT*exp.SPLIT*255))
         exp.moveZ(outer_i,1) #move back
         sho_()
-        outer_j+=1
-        if outer_i==trials: #finished loop
+        data_pressure[outer_i][int(outer_j/ST)]=np.sum(exp.image)/(exp.SPLIT*exp.SPLIT*255)
+        outer_j+=ST
+        if int(outer_j/ST)>=len(np.arange(0, CM, ST)): #simulated for loop
+            outer_j=0
+            outer_i+=1
+        if outer_i>=trials: #finished loop
             mode="menu"
             outer_i=0
             outer_j=0
-            print(a)
-            a=[]
+            print(data_pressure)
             exp.moveZ(2,1) #move back
     elif mode=="speed":
         #speed experiment
@@ -216,10 +261,6 @@ while running:
             #self.moveX(1,-1)
             old_T=exp.skin.origin
             sho_()
-        if outer_j==len(speeds): #simulated for loop
-            outer_j=0
-            outer_i+=1
-            exp.b.setSpeed(20)
         sp=speeds[outer_j]
         exp.b.setSpeed(sp)
         sho_()
@@ -229,6 +270,7 @@ while running:
         sho_()
         vectors=exp.read_vectors(old_T)
         #r_dt[j]=np.sum(np.linalg.norm(vectors))
+        data_speed[outer_i][outer_j]=np.sum(np.linalg.norm(vectors))
         time.sleep(1)
         exp.moveZ(0.5,1) #move up
         sho_()
@@ -238,11 +280,15 @@ while running:
         sho_()
 
         outer_j+=1
+        if outer_j==len(speeds): #simulated for loop
+            outer_j=0
+            outer_i+=1
+            exp.b.setSpeed(20)
         if outer_i==trials: #finished loop
             mode="menu"
             outer_i=0
             outer_j=0
-            
+            print(data_speed)
             exp.b.setSpeed(20)
     elif mode=="edges":
         #edges experiment
@@ -254,6 +300,7 @@ while running:
         sho_()
         vectors=exp.read_vectors(old_T)
         #fl_dt[i]=np.sum(vectors,axis=0)/len(vectors)
+        data_edge[outer_i][0][outer_j]=np.sum(vectors,axis=0)/len(vectors)
         time.sleep(1)
         exp.moveZ(0.5,1) #move up
         sho_()
@@ -264,6 +311,7 @@ while running:
         sho_()
         vectors=exp.read_vectors(old_T)
         #l_dt[i]=np.sum(vectors,axis=0)/len(vectors)
+        data_edge[outer_i][1][outer_j]=np.sum(vectors,axis=0)/len(vectors)
         time.sleep(1)
         exp.moveZ(0.5,1) #move up
         sho_()
@@ -276,23 +324,25 @@ while running:
         sho_()
         vectors=exp.read_vectors(old_T)
         #r_dt[i]=np.sum(vectors,axis=0)/len(vectors)
+        data_edge[outer_i][2][outer_j]=np.sum(vectors,axis=0)/len(vectors)
         time.sleep(1)
         exp.moveZ(0.5,1) #move up
         sho_()
         exp.moveX(1,-1)
         sho_()
         time.sleep(1)
+        outer_j+=1
         if outer_j==samples: #simulated for loop
             outer_j=0
             outer_i+=1
-            
-        outer_j+=1
         if outer_i==trials: #finished loop
             mode="menu"
             outer_i=0
             outer_j=0
+            print(data_edge)
             
 
     if mode=="menu": 
         pygame_widgets.update(events)
     pygame.display.update()
+
