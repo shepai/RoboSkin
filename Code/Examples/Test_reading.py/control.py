@@ -97,7 +97,6 @@ class Experiment:
         t=self.skin.movement(t_)
         return old_T-t
     def run_edge(self,num_samples,flat=True,left=True,right=True):
-        a=[]
         self.skin.reset()
         old_T=self.skin.origin
         #self.move_till_touch(Image) #be touching the platform
