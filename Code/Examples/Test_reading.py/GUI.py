@@ -1,6 +1,7 @@
 import pygame_widgets
 import pygame
 from pygame_widgets.slider import Slider
+from pygame_widgets.button import Button
 from pygame_widgets.textbox import TextBox
 from control import Board
 import time
@@ -31,6 +32,7 @@ background_colour = (255,255,255)
 screen.fill(background_colour)
 pygame.display.flip()
 
+#Create slider 1
 slider = Slider(screen, 100, 100, 300, 10, min=0, max=99, step=1)
 output = TextBox(screen, 450, 100, 50, 50, fontSize=30)
 
@@ -40,12 +42,54 @@ slider_x = width // 2 - slider_width // 2
 slider_y = height // 2 - slider_height // 2
 slider_range = height - slider_height
 
-# Create the slider
+# Create slider 2
 sliderZ = Slider(screen, 100, 200, 300, 10, min=0, max=99, step=1)
 outputZ = TextBox(screen, 450, 200, 50, 50, fontSize=30)
 
 output.disable()  # Act as label instead of textbox
 
+def speed():
+    global running
+    running = False
+    import speed_exp
+
+def pressure():
+    global running
+    running = False
+    import pressure_exp
+
+def direction():
+    global running
+    running = False
+    import edges_exp
+
+#create buttons for experiments
+b1 = Button(
+    screen, 100, 400, 140, 25, text='Speed experiment',
+            fontSize=20, margin=20,
+            inactiveColour=(255, 0, 0),
+            pressedColour=(0, 255, 0), radius=20,
+            onClick=lambda: speed()
+            
+         )
+
+b2 = Button(
+    screen, 100, 430, 140, 25, text='Pressure experiment',
+            fontSize=20, margin=20,
+            inactiveColour=(255, 0, 0),
+            pressedColour=(0, 255, 0), radius=20,
+            onClick=lambda: pressure()
+            
+         )
+
+b3 = Button(
+    screen, 100, 460, 140, 25, text='Direction experiment',
+            fontSize=20, margin=20,
+            inactiveColour=(255, 0, 0),
+            pressedColour=(0, 255, 0), radius=20,
+            onClick=lambda: direction()
+            
+         )
 currentVal=50
 currentValZ=50
 
@@ -101,8 +145,6 @@ while running:
             y1=coord[0]
             x2=old_T[i][1]
             y2=old_T[i][0]
-            #cv2.putText(new,str(i),(x1,y1),cv2.FONT_HERSHEY_SIMPLEX,0.2,(0,255,0))
-            #d=skin.euclid(np.array([x1, y1]), np.array([x2, y2]))
             v[i] =np.array([x1-x2,y1-y2])
             cv2.arrowedLine(new, (x2, y2), (x1, y1), (0, 0, 0), thickness=2)#
 
