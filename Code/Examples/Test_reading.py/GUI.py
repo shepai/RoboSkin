@@ -54,7 +54,7 @@ def init():
     global b1, b2, b3, b1_save, b2_save, b3_save, b1_sho, b2_sho, b3_sho
 
     pygame.init()
-    
+
     screen = pygame.display.set_mode((width1, height2))
     pygame.display.set_caption('TacTip frame control software')
     
@@ -221,12 +221,14 @@ def plot(id): #plot the different datas
         plt.ylabel("Average magnitude size (px)")
         plt.title("How speed affects the time of arrival to the magnitude of vectors")
         plt.legend(loc="lower left")
+        plt.show()
     if id=="pressure" and np.sum(data_pressure)!=0:
         for i in range(len(data_pressure)):
             plt.plot([i for i in np.arange(0, CM, ST)],data_pressure[i])
         plt.xlabel("Pressure in cm")
         plt.ylabel("Pressure in summed pixels")
         plt.title("Pressure vs cm")
+        plt.show()
     if id=="edges" and np.sum(data_edge)!=0:
         for i in range(len(data_edge)):
             f=data_edge[i][0]
@@ -240,7 +242,7 @@ def plot(id): #plot the different datas
         plt.ylabel("Average magnitude size (px)")
         plt.title("How speed affects the time of arrival to the magnitude of vectors")
         plt.legend(loc="lower left")
-    plt.show()
+        plt.show()
     init()
     
 init()
