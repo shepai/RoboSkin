@@ -48,27 +48,16 @@ outputZ = TextBox(screen, 450, 200, 50, 50, fontSize=30)
 
 output.disable()  # Act as label instead of textbox
 
-def speed():
+def change_mode(mo):
     global mode
     global outer_i
     global outer_j
     
     outer_i=0
     outer_j=0
-    mode="speed"
+    mode=mo
 
-def pressure():
-    global mode
-    global outer_i
-    global outer_j
-    
-    outer_i=0
-    outer_j=0
-    mode="pressure"
 
-def direction():
-    global running
-    running = False
 
 def sho_():
     global image
@@ -117,7 +106,7 @@ b1 = Button(
             fontSize=20, margin=20,
             inactiveColour=(255, 0, 0),
             pressedColour=(0, 255, 0), radius=20,
-            onClick=lambda: speed()
+            onClick=lambda: change_mode("speed")
             
          )
 
@@ -126,7 +115,7 @@ b2 = Button(
             fontSize=20, margin=20,
             inactiveColour=(255, 0, 0),
             pressedColour=(0, 255, 0), radius=20,
-            onClick=lambda: pressure()
+            onClick=lambda: change_mode("pressure")
             
          )
 
@@ -135,7 +124,7 @@ b3 = Button(
             fontSize=20, margin=20,
             inactiveColour=(255, 0, 0),
             pressedColour=(0, 255, 0), radius=20,
-            onClick=lambda: direction()
+            onClick=lambda: change_mode("edges")
             
          )
 currentVal=50
@@ -253,11 +242,46 @@ while running:
             mode="menu"
             outer_i=0
             outer_j=0
-            print(a)
-            a=[]
+            
             exp.b.setSpeed(20)
     elif mode=="edges":
         #edges experiment
+        if outer_j==0:
+            exp.skin.reset()
+            old_T=exp.skin.origin
+            #self.move_till_touch(Image) #be touching the platform
+        exp.moveZ(0.5,-1) #move down
+        sho_()
+        vectors=exp.read_vectors(old_T)
+        #fl_dt[i]=np.sum(vectors,axis=0)/len(vectors)
+        time.sleep(1)
+        exp.moveZ(0.5,1) #move up
+        sho_()
+        time.sleep(1)
+        exp.moveZ(0.5,-1) #move down
+        sho_()
+        exp.moveX(1,-1)
+        sho_()
+        vectors=exp.read_vectors(old_T)
+        #l_dt[i]=np.sum(vectors,axis=0)/len(vectors)
+        time.sleep(1)
+        exp.moveZ(0.5,1) #move up
+        sho_()
+        exp.moveX(1,1)
+        sho_()
+        time.sleep(1)
+        exp.moveZ(0.5,-1) #move down
+        sho_()
+        exp.moveX(1,1)
+        sho_()
+        vectors=exp.read_vectors(old_T)
+        #r_dt[i]=np.sum(vectors,axis=0)/len(vectors)
+        time.sleep(1)
+        exp.moveZ(0.5,1) #move up
+        sho_()
+        exp.moveX(1,-1)
+        sho_()
+        time.sleep(1)
         if outer_j==samples: #simulated for loop
             outer_j=0
             outer_i+=1
@@ -267,8 +291,7 @@ while running:
             mode="menu"
             outer_i=0
             outer_j=0
-            print(a)
-            a=[]
+            
 
     if mode=="menu": 
         pygame_widgets.update(events)
