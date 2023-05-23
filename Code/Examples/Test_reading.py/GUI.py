@@ -169,7 +169,7 @@ def sho_():
     #display normal
     frame=exp.skin.getFrame()
     img=frame.copy()
-    
+    old_T=exp.skin.origin
     resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
     surf = pygame.surfarray.make_surface(resized)
     screen.blit(surf, (550, 0))
@@ -259,8 +259,8 @@ SPLIT=10
 outer_i=0
 outer_j=0
 mode="menu"
-samples=1
-trials=1
+samples=3
+trials=20
 speeds=[10,20,30]
 a=[]
 Image=None
@@ -272,11 +272,11 @@ width = int(img.shape[1] * scale_percent / 100)
 height = int(img.shape[0] * scale_percent / 100)
 dim = (width, height)
 CM=1.5
-ST=0.5
+ST=0.4
 #data storage
-data_speed=np.zeros((samples,len(speeds)))
-data_edge=np.zeros((samples,3,samples,2))
-data_pressure=np.zeros((samples,len(np.arange(0, CM, ST))))
+data_speed=np.zeros((trials,len(speeds)))
+data_edge=np.zeros((trials,3,samples,2))
+data_pressure=np.zeros((trials,len(np.arange(0, CM, ST))))
 
 while running:
     #add colouring if data exists
@@ -317,7 +317,9 @@ while running:
 
     if mode=="pressure":
         #pressure experiment
+        
         if outer_j==0: #first trial
+            exp.skin.reset()
             sho_()
             Image=exp.skin.getBinary() #get initial image
             exp.move_till_touch(Image) #be touching the platform
@@ -326,25 +328,29 @@ while running:
         exp.image=exp.skin.getForce(im,exp.SPLIT,image=exp.image,threshold=20,degrade=20,past=Image) #get the force push
         sho_()
         time.sleep(1)
-        exp.moveZ(outer_i,-1) #move down
+        exp.moveZ(outer_j/10,-1) #move down
         sho_()
         time.sleep(1)
         im=exp.skin.getBinary()
         exp.image=exp.skin.getForce(im,exp.SPLIT,image=exp.image,threshold=20,degrade=20,past=Image) #get the force push
         a.append(np.sum(exp.image)/(exp.SPLIT*exp.SPLIT*255))
-        exp.moveZ(outer_i,1) #move back
+        exp.moveZ(outer_j/10,1) #move back
         sho_()
         data_pressure[outer_i][int(outer_j/ST)]=np.sum(exp.image)/(exp.SPLIT*exp.SPLIT*255)
         outer_j+=ST
         if int(outer_j/ST)>=len(np.arange(0, CM, ST)): #simulated for loop
             outer_j=0
             outer_i+=1
+            exp.moveZ(1,1) #move back
+            exp.skin.reset()
+            Image=exp.skin.getBinary() #get initial image
+            exp.move_till_touch(Image) #be touching the platform
         if outer_i>=trials: #finished loop
             mode="menu"
             outer_i=0
             outer_j=0
             print(data_pressure)
-            exp.moveZ(2,1) #move back
+            exp.moveZ(1,1) #move back
     elif mode=="speed":
         #speed experiment
         if outer_j==0:
@@ -352,6 +358,8 @@ while running:
             exp.skin.reset()
             #self.moveX(1,-1)
             old_T=exp.skin.origin
+            Image=exp.skin.getBinary() #get initial image
+            exp.move_till_touch(Image) #be touching the platform
             sho_()
         sp=speeds[outer_j]
         exp.b.setSpeed(sp)
@@ -376,6 +384,11 @@ while running:
             outer_j=0
             outer_i+=1
             exp.b.setSpeed(20)
+            sho_()
+            exp.moveZ(1,1) #move back
+            exp.skin.reset()
+            Image=exp.skin.getBinary() #get initial image
+            exp.move_till_touch(Image) #be touching the platform
         if outer_i==trials: #finished loop
             mode="menu"
             outer_i=0
@@ -388,7 +401,8 @@ while running:
             sho_()
             exp.skin.reset()
             old_T=exp.skin.origin
-            #self.move_till_touch(Image) #be touching the platform
+            Image=exp.skin.getBinary() #get initial image
+            exp.move_till_touch(Image) #be touching the platform
         exp.moveZ(0.5,-1) #move down
         sho_()
         vectors=exp.read_vectors(old_T)
@@ -428,6 +442,11 @@ while running:
         if outer_j==samples: #simulated for loop
             outer_j=0
             outer_i+=1
+            exp.moveZ(1,1) #move back
+            sho_()
+            exp.skin.reset()
+            Image=exp.skin.getBinary() #get initial image
+            exp.move_till_touch(Image) #be touching the platform
         if outer_i==trials: #finished loop
             mode="menu"
             outer_i=0
