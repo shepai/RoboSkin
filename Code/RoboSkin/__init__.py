@@ -290,6 +290,7 @@ class Skin: #skin object for detecting movement
     def reset(self):
         self.origin=self.zero()
         self.last=self.origin.copy()
+        self.init_im=self.getBinary()
 
     def opticFlow(self,past,next):
         """
