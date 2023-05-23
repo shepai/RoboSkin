@@ -158,7 +158,9 @@ def change_mode(mo):
     global outer_i
     global outer_j
     global progress
+    global barCounter
 
+    barCounter=0
     progress=0
     outer_i=0
     outer_j=0
@@ -267,7 +269,7 @@ speeds=[10,20,30]
 a=[]
 Image=None
 progress=0
-
+barCounter=0
 frame=exp.skin.getFrame()
 img=frame.copy()
 scale_percent=40
@@ -318,7 +320,7 @@ while running:
         height_=50
         top=200
         left=100
-        
+        barCounter+=1
         pygame.draw.rect(screen, (0,255,0), pygame.Rect(left,top,maxwidth*progress,height_))
         pygame.draw.rect(screen, (128,128,128), pygame.Rect(left,top,maxwidth,height_), 1)
     
@@ -328,7 +330,7 @@ while running:
 
     if mode=="pressure":
         #pressure experiment
-        progress=((outer_i)*outer_j + outer_j )/(len(np.arange(0, CM, ST))*trials)
+        progress=barCounter/(len(np.arange(0, CM, ST))*trials)
         if outer_j==0: #first trial
             exp.skin.reset()
             sho_()
@@ -363,7 +365,7 @@ while running:
             print(data_pressure)
             exp.moveZ(1,1) #move back
     elif mode=="speed":
-        progress=((outer_i+1)*outer_j)/(len(speeds)*trials)
+        progress=barCounter/(len(speeds)*trials)
         #speed experiment
         if outer_j==0:
             sho_()
@@ -378,9 +380,10 @@ while running:
         sho_()
         exp.moveZ(0.5,-1) #move down
         sho_()
+        sp=outer_j-(outer_j/10)
         for i in np.arange(0.1,0.5,0.1):
             vectors=exp.read_vectors(old_T)
-            exp.moveX(i-(outer_j/10),1)
+            exp.moveX(sp,1)
             sho_()
         vectors=exp.read_vectors(old_T)
         #r_dt[j]=np.sum(np.linalg.norm(vectors))
@@ -410,7 +413,7 @@ while running:
             print(data_speed)
             exp.b.setSpeed(20)
     elif mode=="edges":
-        progress=((outer_i+1)*outer_j)/(trials*samples)
+        progress=barCounter/(samples*trials)
         #edges experiment
         if outer_j==0:
             sho_()
@@ -431,7 +434,7 @@ while running:
         sho_()
         for i in np.arange(0.1,1,0.1):
             vectors=exp.read_vectors(old_T)
-            exp.moveX(i,-1)
+            exp.moveX(0.1,-1)
             sho_()
         vectors=exp.read_vectors(old_T)
         #l_dt[i]=np.sum(vectors,axis=0)/len(vectors)
@@ -454,7 +457,7 @@ while running:
         sho_()
         for i in np.arange(0.1,1,0.1):
             vectors=exp.read_vectors(old_T)
-            exp.moveX(i,-1)
+            exp.moveX(0.1,-1)
             sho_()
         time.sleep(1)
         outer_j+=1
