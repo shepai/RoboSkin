@@ -205,7 +205,7 @@ class Skin: #skin object for detecting movement
         if len(image.shape)==3: gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         binary=image
         if adaptive: binary=self.adaptive(gray)
-        else: binary=cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY)[1]
+        else: binary=cv2.threshold(gray, 100, 255, cv2.THRESH_BINARY)[1]
         if type(self.imF)!=type(""): return binary
         to_Show,spots=self.removeBlob(binary,min_size = min_size)
         return spots.astype(np.uint8)
