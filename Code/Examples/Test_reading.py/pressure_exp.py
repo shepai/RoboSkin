@@ -23,8 +23,9 @@ data=np.zeros((samples,len(np.arange(0, CM, ST))))
 
 for i in range(samples):
     a=ex.run_pressure(cm_samples=CM,step=ST)
+    ex.moveZ(1.5,1)
     print("Trial:",i+1)
-    data[i]=np.zeros(a)
+    data[i]=np.array(a)
     plt.plot([i for i in np.arange(0, CM, ST)],a)
 
 np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/pressures",data)
