@@ -341,20 +341,20 @@ while running:
         exp.image=exp.skin.getForce(im,exp.SPLIT,image=exp.image,threshold=20,degrade=20,past=Image) #get the force push
         sho_()
         time.sleep(1)
-        exp.moveZ(outer_j/10,-1) #move down
+        exp.moveZ(int(outer_j/ST)/75,-1) #move down
         sho_()
         time.sleep(1)
         im=exp.skin.getBinary()
         exp.image=exp.skin.getForce(im,exp.SPLIT,image=exp.image,threshold=20,degrade=20,past=Image) #get the force push
         a.append(np.sum(exp.image)/(exp.SPLIT*exp.SPLIT*255))
-        exp.moveZ(outer_j/10,1) #move back
+        exp.moveZ(int(outer_j/ST)/75,1) #move back
         sho_()
         data_pressure[outer_i][int(outer_j/ST)]=np.sum(exp.image)/(exp.SPLIT*exp.SPLIT*255)
         outer_j+=ST
         if int(outer_j/ST)>=len(np.arange(0, CM, ST)): #simulated for loop
             outer_j=0
             outer_i+=1
-            exp.moveZ(1,1) #move back
+            exp.moveZ(3,1) #move back
             exp.skin.reset()
             Image=exp.skin.getBinary() #get initial image
             exp.move_till_touch(Image) #be touching the platform
