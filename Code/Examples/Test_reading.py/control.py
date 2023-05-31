@@ -99,7 +99,8 @@ class Experiment:
     def run_edge(self,num_samples,flat=True,left=True,right=True):
         self.skin.reset()
         old_T=self.skin.origin
-        #self.move_till_touch(Image) #be touching the platform
+        Image=self.skin.getBinary() #get initial image
+        self.move_till_touch(Image) #be touching the platform
         fl_dt=np.zeros((num_samples,2))
         l_dt=np.zeros((num_samples,2))
         r_dt=np.zeros((num_samples,2))
@@ -136,7 +137,8 @@ class Experiment:
         self.skin.reset()
         #self.moveX(1,-1)
         old_T=self.skin.origin
-        #self.move_till_touch(Image) #be touching the platform
+        Image=self.skin.getBinary() #get initial image
+        self.move_till_touch(Image) #be touching the platform
         r_dt=np.zeros((len(speeds)))
         for j,sp in enumerate(speeds):
             self.b.setSpeed(sp)

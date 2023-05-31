@@ -16,19 +16,20 @@ while COM=="":
 #B.moveZ(10)
 c=0
 ex=Experiment(B)
-#ex.moveZ(1,1)
-samples=1
-speeds=[10,20,30,40]
+ex.moveZ(1,1)
+#ex.moveX(2.5,1)
+samples=10
+speeds=[10,20,30]
 data=np.zeros((samples,len(speeds)))
 for i in range(samples):
     print("Trial:",i+1)
     f=ex.test_speed(speeds)
+    ex.moveZ(2,1)
     #save to main data
     data[i]=f
     weights = np.arange(1, len(speeds)+1)
-    print(f.shape,speeds)
     plt.plot(speeds,f,label="Exp"+str(i))
-
+    np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speeds",data)
 
 #plot the labels
 """plt.scatter(f[:,0],f[:,1],c=weights, cmap='Purples',label="Central")
@@ -41,5 +42,5 @@ plt.title("How speed affects the time of arrival to the magnitude of vectors")
 plt.legend(loc="lower left")
 plt.show()
 
-np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speeds",data)
+
 

@@ -16,14 +16,15 @@ while COM=="":
 #B.moveZ(10)
 c=0
 ex=Experiment(B)
-#ex.moveZ(1,1)
-samples=1
-samples_2=2
+ex.moveZ(1,1)
+samples=10
+samples_2=3
 data=np.zeros((samples,3,samples_2,2))
 
 for i in range(samples):
     print("Trial:",i+1)
     f,l,r=ex.run_edge(samples_2,True,True,True) #get directions
+    ex.moveZ(2,1)
     #save to main data
     data[i][0]=f
     data[i][1]=l
@@ -32,6 +33,7 @@ for i in range(samples):
     plt.scatter(f[:,0],f[:,1],c=weights, cmap='Purples')
     plt.scatter(l[:,0],l[:,1],c=weights, cmap='Greens')
     plt.scatter(r[:,0],r[:,1],c=weights, cmap='Reds')
+    np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/dirs",data)
 
 #plot the labels
 """plt.scatter(f[:,0],f[:,1],c=weights, cmap='Purples',label="Central")
