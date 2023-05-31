@@ -1,11 +1,13 @@
 import PicoRobotics
 import utime
+from machine import freq, Pin
 
 class Move:
     def __init__(self,speed=20):
         self.board=PicoRobotics.KitronikPicoRobotics()
         self.speed=speed
         self.board.motorOff(1)
+        self.pushX=Pin(4 , Pin.IN, Pin.PULL_UP)
     def moveZ(self,num,speed=20):
         direction="f"
         if num<0:
@@ -18,13 +20,19 @@ class Move:
             direction="r"
         step=0
         stop=False
-        self.board.motorOn(1, direction, self.speed)
-        while step < abs(num) and not stop:
-            utime.sleep(0.3)
-            if stopFunc!=None: stop=stopFunc
-            step+=1
+        if self.pushX.value() or direction=="f": #not touching edge
+            self.board.motorOn(1, direction, self.speed)
+            while step < abs(num) and not stop:
+                utime.sleep(0.3)
+                if stopFunc!=None: stop=stopFunc
+                if not self.pushX.value():
+                    break
+                step+=1
             
         self.board.motorOff(1)
+
+
+
 b=Move()
 """b.moveZ(-5)
 utime.sleep(3)
