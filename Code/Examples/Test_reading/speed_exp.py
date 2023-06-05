@@ -9,7 +9,7 @@ while COM=="":
         res=B.serial_ports()
         print("ports:",res)
         B.connect(res[0])
-        B.runFile("C:/Users/dexte/github/RoboSkin/Code/Examples/Test_reading.py/mOTRO CONTROL.py")
+        B.runFile("C:/Users/dexte/github/RoboSkin/Code/Examples/Test_reading/mOTRO CONTROL.py")
         COM=res[0]
     except IndexError:
         time.sleep(1)

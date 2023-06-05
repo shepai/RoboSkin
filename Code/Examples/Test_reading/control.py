@@ -67,7 +67,7 @@ class Board:
 
 class Experiment:
     #17 steps = 1cm on z axis
-    def __init__(self,board,device=1,split=5):
+    def __init__(self,board,device=1,split=5,th=2):
         self.b=board
         self.path = letRun.path
         self.skin=sk.Skin(device=device) #load skin object using demo video
@@ -75,21 +75,22 @@ class Experiment:
         self.old_T=self.skin.origin
         self.SPLIT=split
         self.dist=-1
+        self.th=th
     def move_till_touch(self,im__=None):
         not_touched=True
         #zero
         self.image=np.zeros_like(self.skin.getBinary())
         for i in range(50):
             im=self.skin.getBinary()
-            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=im__) #get the force push
+            self.image,grid=self.skin.getForceGrid(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=im__) #get the force push
         while not_touched: #loop till touching surface
             im=self.skin.getBinary()
-            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=im__) #get the force push
+            self.image,grid=self.skin.getForceGrid(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=im__) #get the force push
             tactile=np.zeros_like(self.frame)
             tactile[:,:,2]=self.image #show push in red
             self.b.moveZ(-1) #move down
-            #print(np.sum(tactile)/(self.SPLIT*self.SPLIT*255))
-            if np.sum(tactile)/(self.SPLIT*self.SPLIT*255) > 2: #if touched
+            print(np.sum(grid),">",np.sum(grid)/(self.SPLIT*self.SPLIT))
+            if np.sum(grid)/(self.SPLIT*self.SPLIT) > self.th: #if touched
                 not_touched=False
     def read_vectors(self,old_T):
         im=self.skin.getBinary()
@@ -167,14 +168,15 @@ class Experiment:
         Image=self.skin.getBinary() #get initial image
         self.move_till_touch(Image) #be touching the platform
         for i in np.arange(0, cm_samples, step):
+            print("depth:",i)
             im=self.skin.getBinary()
-            self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=Image) #get the force push
+            self.image,grid=self.skin.getForceGrid(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=Image) #get the force push
             time.sleep(1)
             self.moveZ(i,-1) #move down
             time.sleep(1)
             im=self.skin.getBinary()
             self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=Image) #get the force push
-            a.append(np.sum(self.image)/(self.SPLIT*self.SPLIT*255))
+            a.append(np.sum(grid)/(self.SPLIT*self.SPLIT))
             self.moveZ(i,1) #move back
         self.moveZ(2,1) #move back
         return a

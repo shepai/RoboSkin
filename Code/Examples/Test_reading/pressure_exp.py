@@ -9,24 +9,28 @@ while COM=="":
         res=B.serial_ports()
         print("ports:",res)
         B.connect(res[0])
-        B.runFile("C:/Users/dexte/github/RoboSkin/Code/Examples/Test_reading.py/mOTRO CONTROL.py")
+        B.runFile("C:/Users/dexte/github/RoboSkin/Code/Examples/Test_reading/mOTRO CONTROL.py")
         COM=res[0]
     except IndexError:
         time.sleep(1)
-B.moveZ(10)
-ex=Experiment(B)
-ex.moveZ(1,1)
+ex=Experiment(B,split=5,th=0.7)
+#ex.moveZ(1,1)
 samples=10
-CM=1.5
-ST=0.5
+CM=1
+ST=0.2
 data=np.zeros((samples,len(np.arange(0, CM, ST))))
-
-for i in range(samples):
-    a=ex.run_pressure(cm_samples=CM,step=ST)
+print("begin")
+try:
+    for i in range(samples):
+        a=ex.run_pressure(cm_samples=CM,step=ST)
+        ex.moveZ(1.5,1)
+        print("Trial:",i+1)
+        data[i]=np.array(a)
+        plt.plot([i for i in np.arange(0, CM, ST)],a)
+except KeyboardInterrupt:
+    print("Interrupt")
     ex.moveZ(1.5,1)
-    print("Trial:",i+1)
-    data[i]=np.array(a)
-    plt.plot([i for i in np.arange(0, CM, ST)],a)
+    exit()
 
 np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/pressures",data)
 plt.xlabel("Pressure in cm")
