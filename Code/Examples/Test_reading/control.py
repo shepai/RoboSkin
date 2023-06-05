@@ -76,6 +76,7 @@ class Experiment:
         self.SPLIT=split
         self.dist=-1
         self.th=th
+        self.IIMM=None
     def move_till_touch(self,im__=None):
         not_touched=True
         #zero
@@ -157,18 +158,23 @@ class Experiment:
         assert dir==1 or dir==-1, "Incorrect direction, must be 1 or -1"
         cm=cm*17 #17 steps per cm
         for i in range(0,round(cm)):
+            im=self.skin.getBinary()
+            if type(self.IIMM)!=type(None): self.image,grid=self.skin.getForceGrid(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=self.IIMM) #get the force push
             self.b.moveZ(1*dir) #move up
     def moveX(self,cm,dir): #dir must be 1 or -1
         assert dir==1 or dir==-1, "Incorrect direction, must be 1 or -1"
         cm=cm*26 #26 steps per cm
         for i in range(0,round(cm)):
+            im=self.skin.getBinary()
+            if type(self.IIMM)!=type(None): self.image,grid=self.skin.getForceGrid(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=self.IIMM) #get the force push
             self.b.moveX(1*dir) #move up
     def run_pressure(self,cm_samples=2,step=0.5):
         a=[]
         Image=self.skin.getBinary() #get initial image
+        self.IIMM=Image.copy()
         self.move_till_touch(Image) #be touching the platform
         for i in np.arange(0, cm_samples, step):
-            print("depth:",i)
+            #print("depth:",i)
             im=self.skin.getBinary()
             self.image,grid=self.skin.getForceGrid(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=Image) #get the force push
             time.sleep(1)
@@ -178,7 +184,7 @@ class Experiment:
             self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=Image) #get the force push
             a.append(np.sum(grid)/(self.SPLIT*self.SPLIT))
             self.moveZ(i,1) #move back
-        self.moveZ(2,1) #move back
+        self.moveZ(1,1) #move back
         return a
 
 
