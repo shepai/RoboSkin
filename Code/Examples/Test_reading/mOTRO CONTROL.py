@@ -1,6 +1,6 @@
 import PicoRobotics
 import utime
-from machine import freq, Pin
+from machine import freq, Pin, ADC
 
 class Move:
     def __init__(self,speed=20):
@@ -32,6 +32,18 @@ class Move:
         self.board.motorOff(1)
 
 
+pot = ADC(Pin(28))
+
+def get_pressure():
+    a=[]
+    alpha = 0.1
+    filtered_value = pot.read_u16()
+    for i in range(50):
+        raw_value = pot.read_u16()
+        filtered_value = alpha * raw_value + (1 - alpha) * filtered_value
+        a.append(raw_value)
+        utime.sleep(0.1)
+    print(sum(a)//50)
 
 b=Move()
 """b.moveZ(-5)
