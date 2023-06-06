@@ -64,6 +64,8 @@ class Board:
         self.COM.exec_raw_no_follow('b.speed='+str(speed))#.decode("utf-8").replace("/r/n","")
     def close(self):
         self.COM.close()
+    def getWeight(self):
+        return float(self.COM.exec('get_pressure()').decode("utf-8").replace("\r\n",""))
 
 class Experiment:
     #17 steps = 1cm on z axis
@@ -90,7 +92,7 @@ class Experiment:
             tactile=np.zeros_like(self.frame)
             tactile[:,:,2]=self.image #show push in red
             self.b.moveZ(-1) #move down
-            print(np.sum(grid),">",np.sum(grid)/(self.SPLIT*self.SPLIT))
+            #print(np.sum(grid),">",np.sum(grid)/(self.SPLIT*self.SPLIT))
             if np.sum(grid)/(self.SPLIT*self.SPLIT) > self.th: #if touched
                 not_touched=False
     def read_vectors(self,old_T):
@@ -160,6 +162,7 @@ class Experiment:
         for i in range(0,round(cm)):
             im=self.skin.getBinary()
             if type(self.IIMM)!=type(None): self.image,grid=self.skin.getForceGrid(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=self.IIMM) #get the force push
+            mag=self.getMagnitude()
             self.b.moveZ(1*dir) #move up
     def moveX(self,cm,dir): #dir must be 1 or -1
         assert dir==1 or dir==-1, "Incorrect direction, must be 1 or -1"
@@ -167,9 +170,11 @@ class Experiment:
         for i in range(0,round(cm)):
             im=self.skin.getBinary()
             if type(self.IIMM)!=type(None): self.image,grid=self.skin.getForceGrid(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=self.IIMM) #get the force push
+            mag=self.getMagnitude()
             self.b.moveX(1*dir) #move up
     def run_pressure(self,cm_samples=2,step=0.5):
         a=[]
+        x=[]
         Image=self.skin.getBinary() #get initial image
         self.IIMM=Image.copy()
         self.move_till_touch(Image) #be touching the platform
@@ -182,10 +187,43 @@ class Experiment:
             time.sleep(1)
             im=self.skin.getBinary()
             self.image=self.skin.getForce(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=Image) #get the force push
-            a.append(np.sum(grid)/(self.SPLIT*self.SPLIT))
+            a.append((np.max(grid)+np.average(grid))/(self.SPLIT*self.SPLIT))
+            x.append(self.b.getWeight())
             self.moveZ(i,1) #move back
         self.moveZ(1,1) #move back
-        return a
+        return a,x
+    def getMagnitude(self):
+        im=self.skin.getBinary()
+        t_=self.skin.getDots(im)
+        t=self.skin.movement(t_)
+        v=np.zeros(t.shape)
+        if t.shape[0]>2:
+            for i,coord in enumerate(t): #show vectors of every point
+                x1=coord[1]
+                y1=coord[0]
+                x2=self.old_T[i][1]
+                y2=self.old_T[i][0]
+                v[i] =np.array([x1-x2,y1-y2])
+        return np.sqrt(np.sum(np.square(np.abs(v))))
+    def run_pressure_2(self,cm_samples=2,step=0.5):
+        a=[]
+        Image=self.skin.getBinary() #get initial image
+        self.skin.reset()
+        self.old_T=self.skin.origin
+        self.move_till_touch(Image) #be touching the platform
+        x=[]
+        for i in np.arange(0, cm_samples, step):
+            #print("depth:",i)
+            mag=self.getMagnitude()
+            time.sleep(1)
+            self.moveZ(i,-1) #move down
+            time.sleep(1)
+            mag=self.getMagnitude()
+            a.append(mag)
+            x.append(self.b.getWeight())
+            self.moveZ(i,1) #move back
+        self.moveZ(1,1) #move back
+        return a,x
 
 
 
