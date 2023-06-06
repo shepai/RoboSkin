@@ -205,13 +205,27 @@ class Experiment:
                 y2=self.old_T[i][0]
                 v[i] =np.array([x1-x2,y1-y2])
         return np.sqrt(np.sum(np.square(np.abs(v))))
+    def getVectors(self):
+        im=self.skin.getBinary()
+        t_=self.skin.getDots(im)
+        t=self.skin.movement(t_)
+        v=np.zeros(t.shape)
+        if t.shape[0]>2:
+            for i,coord in enumerate(t): #show vectors of every point
+                x1=coord[1]
+                y1=coord[0]
+                x2=self.old_T[i][1]
+                y2=self.old_T[i][0]
+                v[i] =np.array([x1-x2,y1-y2])
+        return v
     def run_pressure_2(self,cm_samples=2,step=0.5):
         a=[]
         Image=self.skin.getBinary() #get initial image
-        self.skin.reset()
-        self.old_T=self.skin.origin
+        #self.skin.reset()
+        #self.old_T=self.skin.origin
         self.move_till_touch(Image) #be touching the platform
         x=[]
+        v=[]
         for i in np.arange(0, cm_samples, step):
             #print("depth:",i)
             mag=self.getMagnitude()
@@ -221,9 +235,10 @@ class Experiment:
             mag=self.getMagnitude()
             a.append(mag)
             x.append(self.b.getWeight())
+            v.append(self.getVectors())
             self.moveZ(i,1) #move back
         self.moveZ(1,1) #move back
-        return a,x
+        return a,x,v
 
 
 
