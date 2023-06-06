@@ -107,7 +107,7 @@ class Skin: #skin object for detecting movement
         l_channel, a, b = cv2.split(lab)
         # Applying CLAHE to L-channel
         # feel free to try different values for the limit and grid size:
-        clahe = cv2.createCLAHE(clipLimit=5.0, tileGridSize=(8,8))
+        clahe = cv2.createCLAHE(clipLimit=10.0, tileGridSize=(8,8))
         cl = clahe.apply(l_channel)
 
         # merge the CLAHE enhanced L-channel with the a and b channel
@@ -215,12 +215,12 @@ class Skin: #skin object for detecting movement
         @param iter is how many iterations it will make an average on
         """
         im=self.getBinary()
-        old_T=self.getDots(im)
-        max_t=[]
+        #old_T=self.getDots(im)
+        max_t=[] #[0,0] for i in range(300)
         for i in range(iter):
             im=self.getBinary()
             t=self.getDots(im)
-            if len(t)>len(max_t):
+            if len(t)>len(max_t): #take least amount to always be sure
                 max_t=t.copy()
                 self.startIm=im.copy()
         return max_t
