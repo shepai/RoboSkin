@@ -17,7 +17,7 @@ while COM=="":
 
 ex=Experiment(B,split=5,th=0.7)
 #ex.moveZ(1,1)
-samples=30
+samples=100
 CM=1
 ST=0.2
 data=np.zeros((samples,2,len(np.arange(0, CM, ST))))
@@ -37,7 +37,7 @@ try:
         if data[i][0][0]>data[i][0][1] or data[i][0][1]>data[i][0][2] or data[i][0][2]>data[i][0][3] or data[i][0][3]>data[i][0][4]: #error detected
             log[i][1]=1
         plt.plot(x,a)
-        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/pressures1",data)
+        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/pressures",data)
         np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/errorlog",log)
         np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/vectors",vecs)
 except KeyboardInterrupt:

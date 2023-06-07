@@ -15,22 +15,29 @@ while COM=="":
         time.sleep(1)
 #B.moveZ(10)
 c=0
-ex=Experiment(B)
-ex.moveZ(1,1)
+ex=Experiment(B,th=0.7)
+#ex.moveZ(1,1)
 ex.moveX(2.5,1)
-samples=10
-speeds=[10,20,30]
+samples=15
+speeds=[10,20,30,40]
 data=np.zeros((samples,len(speeds)))
-for i in range(samples):
-    print("Trial:",i+1)
-    f=ex.test_speed(speeds)
-    ex.moveZ(2,1)
-    #save to main data
-    data[i]=f
-    weights = np.arange(1, len(speeds)+1)
-    plt.plot(speeds,f,label="Exp"+str(i))
-    np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speeds",data)
-
+vecs=np.zeros((samples,len(speeds),ex.skin.origin.shape[0],2))
+try:
+    for i in range(samples):
+        print("Trial:",i+1)
+        f,v=ex.test_speed(speeds)
+        ex.moveZ(2,1)
+        #save to main data
+        data[i]=f
+        vecs[i]=v.copy()
+        weights = np.arange(1, len(speeds)+1)
+        plt.plot(speeds,f,label="Exp"+str(i))
+        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speeds1",data)
+        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speed_vectors1",vecs)
+except KeyboardInterrupt:
+    print("Interrupt")
+    ex.moveZ(1.5,1)
+    exit()       
 #plot the labels
 """plt.scatter(f[:,0],f[:,1],c=weights, cmap='Purples',label="Central")
 plt.scatter(l[:,0],l[:,1],c=weights, cmap='Greens',label="Top")

@@ -138,24 +138,26 @@ class Experiment:
                 time.sleep(1)
         return fl_dt,l_dt,r_dt
     def test_speed(self,speeds=[]):
-        self.skin.reset()
+        #self.skin.reset()
         #self.moveX(1,-1)
         old_T=self.skin.origin
         Image=self.skin.getBinary() #get initial image
         self.move_till_touch(Image) #be touching the platform
         r_dt=np.zeros((len(speeds)))
+        v=[]
         for j,sp in enumerate(speeds):
             self.b.setSpeed(sp)
             self.moveZ(0.5,-1) #move down
             self.moveX(0.5-(j/10),1)
             vectors=self.read_vectors(old_T)
             r_dt[j]=np.sum(np.linalg.norm(vectors))
+            v.append(self.getVectors())
             time.sleep(1)
             self.moveZ(0.5,1) #move up
             self.moveX(0.5-(j/10),-1)
             time.sleep(1)
         self.b.setSpeed(20)
-        return r_dt
+        return r_dt,v 
     def moveZ(self,cm,dir): #dir must be 1 or -1
         assert dir==1 or dir==-1, "Incorrect direction, must be 1 or -1"
         cm=cm*17 #17 steps per cm
