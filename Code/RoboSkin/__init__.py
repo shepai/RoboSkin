@@ -216,7 +216,7 @@ class Skin: #skin object for detecting movement
         """
         im=self.getBinary()
         #old_T=self.getDots(im)
-        max_t=[] #[0,0] for i in range(300)
+        max_t=[]#[[0,0] for i in range(300)]
         for i in range(iter):
             im=self.getBinary()
             t=self.getDots(im)
@@ -332,6 +332,7 @@ class Skin: #skin object for detecting movement
         """
         all=self.euclid(t1,t2,axis=1)
         average=self.euclid(t1,t2)/len(t1)
+       
         std=np.sqrt((self.euclid(t1**2,t2**2)/len(t1))-(average**2))
 
         a=all[all>average+std]
@@ -545,7 +546,95 @@ class digiTip:
     def setPos(self,x,y):
         self.pos=[y,x]
     
-
+class tacLeg(Skin):
+    def getBinary(self,min_size = 400,adaptive=False):
+        """
+        get the binary image from the sensor and return only the white dots (filter out glare)
+        """
+        image=self.getFrame()
+        gray=image
+        if len(image.shape)==3: gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        binary = cv2.adaptiveThreshold(gray, 255,
+	cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51,1)
+        kernel = np.ones((2,2),np.uint8)
+        binary = cv2.erode(binary,kernel,iterations = 2)
+        if adaptive: binary=self.adaptive(gray)
+        if type(self.imF)!=type(""): return binary
+        #return binary
+        to_Show,spots=self.removeBlob(binary,min_size = min_size)
+        return spots.astype(np.uint8)
+    def getDots(self,gray,size=1,centre=None):
+        """
+        return the centroud positions of all the points within the binary image
+        @param gray
+        """
+        if centre==None:centre=self.centre
+        labels, nlabels = ndimage.label(gray)
+        t = ndimage.center_of_mass(gray, labels, np.arange(nlabels) + 1 )
+        t=np.array(t)
+        t=np.rint(t).astype(int)
+        temp=[]
+        for i in range(len(t)):
+            if type(centre)!=type(0):
+                temp.append(np.array(t[i]))
+        t=np.array(temp)
+        return t
+    def movement(self,new,referenceArray=None,MAXD=100):
+        """
+        detect the movement of points using the new image
+        @param new
+        @param maxD is the maxdepth to search
+        """
+        if type(referenceArray)==type(None): referenceArray=self.last.copy()
+        arrayA=new.copy()
+        arrayB=referenceArray.copy()
+        if len(new)>2: #check coords exist
+            stored=np.zeros_like(arrayA+(2,))
+            looped=np.zeros_like(arrayB)
+            used=[]
+            looped=self.loop_through(stored,used,looped,arrayA,arrayB,1,maxL=MAXD)
+            print(looped.shape)
+            #TODO experiment with adding the unpicked lowest distances instead of the orginal point
+            for i, eachPoint in enumerate(arrayB): #fill in gaps
+                if np.sum(looped[i])==0:
+                    looped[i]=eachPoint.copy()
+            
+                #self.last=self.origin.copy()
+            self.last=looped.copy()
+            return looped
+        else:
+            return arrayB
+    def loop_through(self,stored,used,looped,arrayA,arrayB,count,maxL=20,dist=20):
+        """
+        Recursive method to find the closest points
+        @param stored is the items that have been visited but can be again
+        @param used is the already used indicies
+        @param looped is the big array of point positions
+        @param arrayA is the incoming points
+        @param arrayB is the og points
+        @param count is a counter to preent infinite recursion 
+        @param maxL is the maximum level it will search
+        @param dist is the parameter that removes shapes over a crtain distance
+        """
+        if count==maxL:
+            return looped
+        for i, eachPoint in enumerate(arrayB): #loop through distances and pair off
+            distances=self.euclid(eachPoint,arrayA,axis=1)#np.sqrt(np.sum(eachPoint-arrayA,axis=1)**2)
+            min_dist=distances[np.argmin(distances)]
+            ind=np.argmin(distances)
+            if ind not in used and distances[ind]<dist: #make sure within parameters
+                looped[i]=arrayA[ind]
+                used.append(ind)
+                stored[ind]=[min_dist,i]
+            else: #if the index is already used
+                if stored[ind][0]>min_dist: #something found better
+                    j=stored[ind][1] #get old index
+                    looped[i]=arrayA[ind] #set pointer
+                    stored[ind]=[min_dist,i]
+                    looped=self.loop_through(stored,used,looped,arrayA,arrayB,count+1,maxL=maxL)
+        return looped
+    
+    
 #C:/Users/dexte/github/Chaos-Robotics/Bio-inspired sensors/Tactip/Vid/Movement.mp4
 #C:/Users/dexte/github/Chaos-Robotics/movement.avi
 """
