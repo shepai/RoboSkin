@@ -3,13 +3,14 @@ import RoboSkin as sk
 import numpy as np
 import cv2
 from sklearn.linear_model import LinearRegression
+import pickle
 
 #################################################
 #Get data
 #################################################
-path="C:/Users/dexte/github/RoboSkin/Code/Models/saved/"
-vecs=np.load(path+"vectors2.npy")
-data=np.load(path+"pressures2.npy")
+path1="C:/Users/dexte/github/RoboSkin/Code/Models/saved/"
+vecs=np.load(path1+"vectors2.npy")
+data=np.load(path1+"pressures2.npy")
 
 classes=data[:,1][0]/200
 def find_nearest(array, value): #return class
@@ -24,15 +25,16 @@ y_data=data[:,1][0:SIZE].flatten()/200
 reg = LinearRegression().fit(X_data, y_data)
 print("Score on training",reg.score(X_data, y_data))
 
+name=path1+"pickle_weight_model.pkl"
+with open(name,'rb') as file:
+    weight=pickle.load(file)
 #################################################
 #Skin reading and prediction
 #################################################
 
-skin=sk.Skin(device=1)
-
 path= letRun.path
 #videoFile=path+"Movement4.avi"
-skin=sk.Skin(device=1) #load skin object using demo video
+skin=sk.Skin(videoFile=path+"Movement4.avi") #load skin object using demo video
 frame=skin.getFrame()
 old_T=skin.origin
 
@@ -48,7 +50,8 @@ while(True):
             x2=old_T[i][1]
             y2=old_T[i][0]
             v[i] =np.array([x1-x2,y1-y2])
-
-    p=reg.predict(np.array([v]))
-    print("PREDICTION:",p)
+    #print(v.shape,v.reshape(1,v.shape[0]).shape)
+    p=reg.predict(v.reshape(1,v.shape[0]))
+    print(p)
+    print("PREDICTION:",weight.predict(np.array([p/10]))[0],"g")
     
