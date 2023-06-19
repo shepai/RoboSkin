@@ -203,9 +203,11 @@ class Skin: #skin object for detecting movement
         image=self.getFrame()
         gray=image
         if len(image.shape)==3: gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        binary=image
+        binary = cv2.adaptiveThreshold(gray, 255,
+	cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51,1)
+        kernel = np.ones((2,2),np.uint8)
+        binary = cv2.erode(binary,kernel,iterations = 2)
         if adaptive: binary=self.adaptive(gray)
-        else: binary=cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)[1]
         if type(self.imF)!=type(""): return binary
         to_Show,spots=self.removeBlob(binary,min_size = min_size)
         return spots.astype(np.uint8)
@@ -216,11 +218,14 @@ class Skin: #skin object for detecting movement
         """
         im=self.getBinary()
         #old_T=self.getDots(im)
+        moving_av=[]
         max_t=[]#[[0,0] for i in range(300)]
         for i in range(iter):
             im=self.getBinary()
             t=self.getDots(im)
-            if len(t)>len(max_t): #take least amount to always be sure
+            moving_av.append(len(t))
+            cur_av=sum(moving_av)/len(moving_av)
+            if cur_av-len(t)<cur_av-len(max_t): #get closest to average
                 max_t=t.copy()
                 self.startIm=im.copy()
         return max_t
@@ -555,7 +560,7 @@ class tacLeg(Skin):
         gray=image
         if len(image.shape)==3: gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         binary = cv2.adaptiveThreshold(gray, 255,
-	cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51,1)
+	cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 51,1)
         kernel = np.ones((2,2),np.uint8)
         binary = cv2.erode(binary,kernel,iterations = 2)
         if adaptive: binary=self.adaptive(gray)
@@ -593,7 +598,7 @@ class tacLeg(Skin):
             looped=np.zeros_like(arrayB)
             used=[]
             looped=self.loop_through(stored,used,looped,arrayA,arrayB,1,maxL=MAXD)
-            print(looped.shape)
+            #print(looped.shape)
             #TODO experiment with adding the unpicked lowest distances instead of the orginal point
             for i, eachPoint in enumerate(arrayB): #fill in gaps
                 if np.sum(looped[i])==0:
