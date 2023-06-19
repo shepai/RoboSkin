@@ -6,9 +6,9 @@ import cv2
 path= letRun.path
 skin=sk.Skin(device=1)#videoFile=path+"Movement4.avi") #load skin object using demo video
 
-p=np.concatenate(skin.getFrame(),axis=1)
+p=skin.getFrame()
 h1, w1 = p.shape[:2]
-out = cv2.VideoWriter('CloseUp1.avi',cv2.VideoWriter_fourcc(*'DIVX'), 15, (w1,h1))
+out = cv2.VideoWriter('flatSkin.avi',cv2.VideoWriter_fourcc(*'DIVX'), 60, (w1,h1))
 
 while True:
     frame=skin.getFrame()
