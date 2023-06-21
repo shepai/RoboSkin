@@ -107,7 +107,7 @@ class Skin: #skin object for detecting movement
         l_channel, a, b = cv2.split(lab)
         # Applying CLAHE to L-channel
         # feel free to try different values for the limit and grid size:
-        clahe = cv2.createCLAHE(clipLimit=10.0, tileGridSize=(8,8))
+        clahe = cv2.createCLAHE(clipLimit=4.0, tileGridSize=(8,8))
         cl = clahe.apply(l_channel)
 
         # merge the CLAHE enhanced L-channel with the a and b channel
@@ -115,6 +115,11 @@ class Skin: #skin object for detecting movement
 
         # Converting image from LAB Color model to BGR color spcae
         frame = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+        sharpen_filter=np.array([[-1,-1,-1],
+                 [-1,9,-1],
+                [-1,-1,-1]])
+        # applying kernels to the input image to get the sharpened image
+        frame=cv2.filter2D(frame,-1,sharpen_filter)
         return frame
     def adaptive(self,img,threshold=100):
         """
