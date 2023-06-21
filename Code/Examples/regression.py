@@ -6,7 +6,7 @@ import RoboSkin as sk
 import numpy as np
 
 SIZE=0.3
-name="C:/Users/dexte/OneDrive/Documents/AI/Data_Labeller/pickle_ridge.pkl"
+name="C:/Users/dexte/OneDrive/Documents/AI/Data_Labeller/pickle_imputer.pkl"
 reg=None
 with open(name,'rb') as file:
     reg=pickle.load(file)
@@ -39,11 +39,14 @@ while True:
     points=predict(reg,np.array([frame]))[0]
     for j,_ in enumerate(points):
         #cv2.putText(frame_,str(j),(int(_[0]),int(_[1])),cv2.FONT_HERSHEY_SIMPLEX,0.3,(255,0,0))
-        #cv2.circle(frame_,(int(_[0]),int(_[1])),2,(250,0,0),4)
+        cv2.circle(frame_,(int(_[0]),int(_[1])),2,(250,0,0),4)
         #print((int(initial[j][0]),int(initial[j][1])),(int(_[0]),int(_[1])))
         cv2.arrowedLine(new,(int(initial[j][0]),int(initial[j][1])),(int(_[0]),int(_[1])), (0, 0, 0), thickness=2)
+
+    
     cv2.imshow('Image', frame_)
     cv2.imshow('arrows', new)
+    #cv2.imshow('sharp',sharp_image)
     past=points.copy()
     q=cv2.waitKey(1) 
     if q & 0xFF == ord('q'):
