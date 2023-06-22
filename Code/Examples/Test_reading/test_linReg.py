@@ -9,8 +9,8 @@ import pickle
 #Get data
 #################################################
 path1="C:/Users/dexte/github/RoboSkin/Code/Models/saved/"
-vecs=np.load(path1+"vectors2.npy")
-data=np.load(path1+"pressures2.npy")
+vecs=np.load(path1+"vectors.npy")
+data=np.load(path1+"pressures.npy")
 
 classes=data[:,1][0]/200
 def find_nearest(array, value): #return class
@@ -31,27 +31,42 @@ with open(name,'rb') as file:
 #################################################
 #Skin reading and prediction
 #################################################
+name="C:/Users/dexte/OneDrive/Documents/AI/Data_Labeller/pickle_imputer.pkl"
+reg1=None
+with open(name,'rb') as file:
+    reg1=pickle.load(file)
+SIZE=0.3
+def predict(reg1,dat):
+    p=reg1.predict(dat)
+    p=(p.reshape((p.shape[0],p.shape[1]//2,2))*255/SIZE)
+    return p
+
 
 path= letRun.path
-#videoFile=path+"Movement4.avi"
-skin=sk.Skin(videoFile=path+"Movement4.avi") #load skin object using demo video
+skin=sk.Skin(device=1)#videoFile=path+"Movement4.avi") #load skin object using demo video
 frame=skin.getFrame()
-old_T=skin.origin
+h=frame.shape[1]*SIZE
+w=frame.shape[0]*SIZE
+
+frame=cv2.resize(frame,(int(h),int(w)),interpolation=cv2.INTER_AREA)
+frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).flatten()/255
+past=predict(reg1,np.array([frame]))[0]
+initial=past.copy()
 
 while(True):
-    im=skin.getBinary()
-    t_=skin.getDots(im)
-    t=skin.movement(t_)
-    v=np.zeros(t.shape)
-    if t.shape[0]>2:
-        for i,coord in enumerate(t): #show vectors of every point
-            x1=coord[1]
-            y1=coord[0]
-            x2=old_T[i][1]
-            y2=old_T[i][0]
-            v[i] =np.array([x1-x2,y1-y2])
+    frame_=skin.getFrame()
+    frame=cv2.resize(frame_,(int(h),int(w)),interpolation=cv2.INTER_AREA)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).flatten()/255
+    new=np.zeros_like(frame_)+255
+    points=predict(reg1,np.array([frame]))[0]
+    av=[0,0]
+    for j,_ in enumerate(points):
+        cv2.circle(frame_,(int(_[0]),int(_[1])),2,(250,0,0),4)
     #print(v.shape,v.reshape(1,v.shape[0]).shape)
-    p=reg.predict(v.reshape(1,v.shape[0]))
-    print(p)
+    vectors=initial-points
+    p=reg.predict(vectors.reshape((1,vectors.flatten().shape[0])))
     print("PREDICTION:",weight.predict(np.array([p/10]))[0],"g")
-    
+    cv2.imshow('Image', frame_)
+    q=cv2.waitKey(1) 
+    if q & 0xFF == ord('q'):
+        break
