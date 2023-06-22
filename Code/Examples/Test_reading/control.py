@@ -6,7 +6,18 @@ import glob
 import letRun #This library can be deleted, it is used for debugging
 import RoboSkin as sk
 import numpy as np
+import pickle 
 
+SIZE=0.3
+name="C:/Users/dexte/OneDrive/Documents/AI/Data_Labeller/pickle_imputer.pkl"
+reg=None
+with open(name,'rb') as file:
+    reg=pickle.load(file)
+
+def predict(reg1,dat):
+    p=reg1.predict(dat)
+    p=(p.reshape((p.shape[0],p.shape[1]//2,2))*255/SIZE)
+    return p
 """
 Setup control with micropython device
 """
@@ -66,10 +77,10 @@ class Board:
         self.COM.close()
     def getWeight(self):
         return float(self.COM.exec('get_pressure()').decode("utf-8").replace("\r\n",""))
-
+import cv2
 class Experiment:
     #17 steps = 1cm on z axis
-    def __init__(self,board,device=1,split=5,th=2):
+    def __init__(self,board,device=1,split=10,th=2):
         self.b=board
         self.path = letRun.path
         self.skin=sk.Skin(device=device) #load skin object using demo video
@@ -92,6 +103,7 @@ class Experiment:
             tactile=np.zeros_like(self.frame)
             tactile[:,:,2]=self.image #show push in red
             self.b.moveZ(-1) #move down
+            
             #print(np.sum(grid),">",np.sum(grid)/(self.SPLIT*self.SPLIT))
             if np.sum(grid)/(self.SPLIT*self.SPLIT) > self.th: #if touched
                 not_touched=False
@@ -238,6 +250,39 @@ class Experiment:
             a.append(mag)
             x.append(self.b.getWeight())
             v.append(self.getVectors())
+            self.moveZ(i,1) #move back
+        self.moveZ(1,1) #move back
+        return a,x,v
+    def run_pressure_3(self,cm_samples=2,step=0.5):
+        a=[]
+        Image=self.skin.getBinary() #get initial image
+        #self.skin.reset()
+        #self.old_T=self.skin.origin
+        self.move_till_touch(Image) #be touching the platform
+        x=[]
+        v=[]
+        frame=self.skin.getFrame()
+        h=frame.shape[1]*SIZE
+        w=frame.shape[0]*SIZE
+        frame=cv2.resize(frame,(int(h),int(w)),interpolation=cv2.INTER_AREA)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).flatten()/255
+        past=predict(reg,np.array([frame]))[0]
+        initial=past.copy()
+        for i in np.arange(0, cm_samples, step):
+            #print("depth:",i)
+            mag=self.getMagnitude()
+            time.sleep(1)
+            self.moveZ(i,-1) #move down
+            time.sleep(1)
+            mag=self.getMagnitude()
+            frame_=self.skin.getFrame()
+            frame=cv2.resize(frame_,(int(h),int(w)),interpolation=cv2.INTER_AREA)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).flatten()/255
+            points=predict(reg,np.array([frame]))[0]
+
+            a.append(mag)
+            x.append(self.b.getWeight())
+            v.append(initial-points)
             self.moveZ(i,1) #move back
         self.moveZ(1,1) #move back
         return a,x,v
