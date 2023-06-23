@@ -22,7 +22,7 @@ SIZE=-1
 X_data=vecs[0:SIZE].reshape((len(vecs[0:SIZE])*vecs.shape[1],vecs.shape[2]*2))
 y_data=data[:,1][0:SIZE].flatten()/200
 
-reg = LinearRegression().fit(X_data, y_data)
+reg = LinearRegression(positive=True).fit(X_data, y_data)
 print("Score on training",reg.score(X_data, y_data))
 
 name=path1+"pickle_weight_model.pkl"
@@ -43,7 +43,7 @@ def predict(reg1,dat):
 
 
 path= letRun.path
-skin=sk.Skin(device=1)#videoFile=path+"Movement4.avi") #load skin object using demo video
+skin=sk.Skin(videoFile=path+"push.avi")#videoFile=path+"push.avi") #load skin object using demo video
 frame=skin.getFrame()
 h=frame.shape[1]*SIZE
 w=frame.shape[0]*SIZE
@@ -63,9 +63,11 @@ while(True):
     for j,_ in enumerate(points):
         cv2.circle(frame_,(int(_[0]),int(_[1])),2,(250,0,0),4)
     #print(v.shape,v.reshape(1,v.shape[0]).shape)
-    vectors=initial-points
-    p=reg.predict(vectors.reshape((1,vectors.flatten().shape[0])))
-    print("PREDICTION:",weight.predict(np.array([p/10]))[0],"g")
+    vectors=(initial-points)
+    p=reg.predict(vectors.reshape((1,vectors.flatten().shape[0])))*10
+    val=weight.predict(np.array([p/100]))[0]
+    if val<0: val=0
+    print("PREDICTION:",val,"g")
     cv2.imshow('Image', frame_)
     q=cv2.waitKey(1) 
     if q & 0xFF == ord('q'):
