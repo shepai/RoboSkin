@@ -57,6 +57,7 @@ class Skin: #skin object for detecting movement
             self.MAX=1000
         elif videoFile=="": self.cap = cv2.VideoCapture(device)
         else: self.cap = cv2.VideoCapture(videoFile)
+        self.sharpen=True
         self.imF=copy.deepcopy(imageFile)
         self.vid=videoFile #save viceo file
         self.centre=np.array(self.getFrame().shape[0:-1])//2 #get centre of frame
@@ -79,6 +80,7 @@ class Skin: #skin object for detecting movement
         self.begin=[]
         self.good_new=[]
         self.good_old=[]
+        
         
         self.p0 = cv2.goodFeaturesToTrack(past, mask = None, **feature_params)
     def setImage(self,image):
@@ -115,11 +117,13 @@ class Skin: #skin object for detecting movement
 
         # Converting image from LAB Color model to BGR color spcae
         frame = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
-        sharpen_filter=np.array([[-1,-1,-1],
-                 [-1,9,-1],
-                [-1,-1,-1]])
-        # applying kernels to the input image to get the sharpened image
-        frame=cv2.filter2D(frame,-1,sharpen_filter)
+        if self.sharpen:
+            
+            sharpen_filter=np.array([[-1,-1,-1],
+                    [-1,9,-1],
+                    [-1,-1,-1]])
+            # applying kernels to the input image to get the sharpened image
+            frame=cv2.filter2D(frame,-1,sharpen_filter)
         return frame
     def adaptive(self,img,threshold=100):
         """
