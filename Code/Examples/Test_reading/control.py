@@ -112,7 +112,7 @@ class Experiment:
         t_=self.skin.getDots(im)
         t=self.skin.movement(t_)
         return old_T-t
-    def run_edge(self,num_samples,flat=True,left=True,right=True):
+    def run_edge(self,num_samples,mode=1,flat=True,left=True,right=True):
         self.skin.reset()
         old_T=self.skin.origin
         Image=self.skin.getBinary() #get initial image
@@ -120,10 +120,24 @@ class Experiment:
         fl_dt=np.zeros((num_samples,2))
         l_dt=np.zeros((num_samples,2))
         r_dt=np.zeros((num_samples,2))
+        frame=self.skin.getFrame()
+        h=frame.shape[1]*SIZE
+        w=frame.shape[0]*SIZE
+        frame=cv2.resize(frame,(int(h),int(w)),interpolation=cv2.INTER_AREA)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).flatten()/255
+        past=predict(reg,np.array([frame]))[0]
+        initial=past.copy()
+        vectors=None
         if flat:
             for i in range(num_samples):
                 self.moveZ(0.5,-1) #move down
-                vectors=self.read_vectors(old_T)
+                if mode==1:vectors=self.read_vectors(old_T)
+                elif mode==2:
+                    frame_=self.skin.getFrame()
+                    frame=cv2.resize(frame_,(int(h),int(w)),interpolation=cv2.INTER_AREA)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).flatten()/255
+                    points=predict(reg,np.array([frame]))[0]
+                    vectors=initial-points
                 fl_dt[i]=np.sum(vectors,axis=0)/len(vectors)
                 time.sleep(1)
                 self.moveZ(0.5,1) #move up
@@ -132,7 +146,13 @@ class Experiment:
             for i in range(num_samples):
                 self.moveZ(0.5,-1) #move down
                 self.moveX(1,-1)
-                vectors=self.read_vectors(old_T)
+                if mode==1:vectors=self.read_vectors(old_T)
+                elif mode==2:
+                    frame_=self.skin.getFrame()
+                    frame=cv2.resize(frame_,(int(h),int(w)),interpolation=cv2.INTER_AREA)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).flatten()/255
+                    points=predict(reg,np.array([frame]))[0]
+                    vectors=initial-points
                 l_dt[i]=np.sum(vectors,axis=0)/len(vectors)
                 time.sleep(1)
                 self.moveZ(0.5,1) #move up
@@ -142,7 +162,13 @@ class Experiment:
             for i in range(num_samples):
                 self.moveZ(0.5,-1) #move down
                 self.moveX(1,1)
-                vectors=self.read_vectors(old_T)
+                if mode==1:vectors=self.read_vectors(old_T)
+                elif mode==2:
+                    frame_=self.skin.getFrame()
+                    frame=cv2.resize(frame_,(int(h),int(w)),interpolation=cv2.INTER_AREA)
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).flatten()/255
+                    points=predict(reg,np.array([frame]))[0]
+                    vectors=initial-points
                 r_dt[i]=np.sum(vectors,axis=0)/len(vectors)
                 time.sleep(1)
                 self.moveZ(0.5,1) #move up
@@ -176,7 +202,6 @@ class Experiment:
         for i in range(0,round(cm)):
             im=self.skin.getBinary()
             if type(self.IIMM)!=type(None): self.image,grid=self.skin.getForceGrid(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=self.IIMM) #get the force push
-            mag=self.getMagnitude()
             self.b.moveZ(1*dir) #move up
     def moveX(self,cm,dir): #dir must be 1 or -1
         assert dir==1 or dir==-1, "Incorrect direction, must be 1 or -1"
@@ -184,7 +209,6 @@ class Experiment:
         for i in range(0,round(cm)):
             im=self.skin.getBinary()
             if type(self.IIMM)!=type(None): self.image,grid=self.skin.getForceGrid(im,self.SPLIT,image=self.image,threshold=20,degrade=20,past=self.IIMM) #get the force push
-            mag=self.getMagnitude()
             self.b.moveX(1*dir) #move up
     def run_pressure(self,cm_samples=2,step=0.5):
         a=[]
