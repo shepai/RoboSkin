@@ -175,9 +175,16 @@ class Experiment:
                 self.moveX(1,-1)
                 time.sleep(1)
         return fl_dt,l_dt,r_dt
-    def test_speed(self,speeds=[]):
+    def test_speed(self,speeds=[],mode=1):
         #self.skin.reset()
         #self.moveX(1,-1)
+        frame=self.skin.getFrame()
+        h=frame.shape[1]*SIZE
+        w=frame.shape[0]*SIZE
+        frame=cv2.resize(frame,(int(h),int(w)),interpolation=cv2.INTER_AREA)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).flatten()/255
+        past=predict(reg,np.array([frame]))[0]
+        initial=past.copy()
         old_T=self.skin.origin
         Image=self.skin.getBinary() #get initial image
         self.move_till_touch(Image) #be touching the platform
@@ -189,7 +196,14 @@ class Experiment:
             self.moveX(0.5-(j/10),1)
             vectors=self.read_vectors(old_T)
             r_dt[j]=np.sum(np.linalg.norm(vectors))
-            v.append(self.getVectors())
+            if mode==1:v.append(self.getVectors())
+            elif mode==2:
+                frame_=self.skin.getFrame()
+                frame=cv2.resize(frame_,(int(h),int(w)),interpolation=cv2.INTER_AREA)
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY).flatten()/255
+                points=predict(reg,np.array([frame]))[0]
+                v.append(initial-points)
+            
             time.sleep(1)
             self.moveZ(0.5,1) #move up
             self.moveX(0.5-(j/10),-1)
