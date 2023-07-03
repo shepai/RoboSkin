@@ -15,15 +15,16 @@ while COM=="":
         time.sleep(1)
 #B.moveZ(10)
 c=0
-ex=Experiment(B)
+ex=Experiment(B,split=10,th=1.5)
 ex.moveZ(1,1)
+ex.moveX(3,-1)
 samples=30
 samples_2=3
 data=np.zeros((samples,3,samples_2,2))
 
 for i in range(samples):
     print("Trial:",i+1)
-    f,l,r=ex.run_edge(samples_2,True,True,True) #get directions
+    f,l,r=ex.run_edge(samples_2,2,True,True,True) #get directions
     ex.moveZ(2,1)
     #save to main data
     data[i][0]=f
@@ -33,7 +34,7 @@ for i in range(samples):
     plt.scatter(f[:,0],f[:,1],c=weights, cmap='Purples')
     plt.scatter(l[:,0],l[:,1],c=weights, cmap='Greens')
     plt.scatter(r[:,0],r[:,1],c=weights, cmap='Reds')
-    np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/dirs2",data)
+    np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/dirs3_soft",data)
 
 #plot the labels
 """plt.scatter(f[:,0],f[:,1],c=weights, cmap='Purples',label="Central")
@@ -44,5 +45,5 @@ plt.colorbar()
 plt.title("Scatter of average vector of different sensations for vectors")
 plt.show()
 
-np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/dirs",data)
+#np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/dirs3_soft",data)
 

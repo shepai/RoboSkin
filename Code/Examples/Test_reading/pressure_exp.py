@@ -15,18 +15,18 @@ while COM=="":
         time.sleep(1)
 
 
-ex=Experiment(B,split=5,th=0.7)
+ex=Experiment(B,split=10,th=1.5)
 #ex.moveZ(1,1)
 samples=100
 CM=1
 ST=0.2
 data=np.zeros((samples,2,len(np.arange(0, CM, ST))))
-vecs=np.zeros((samples,len(np.arange(0, CM, ST)),ex.skin.origin.shape[0],2))
+vecs=np.zeros((samples,len(np.arange(0, CM, ST)),133,2))
 log=np.zeros((samples,2))
 print("begin",ex.b.getWeight())
 try:
     for i in range(samples):
-        a,x,v=ex.run_pressure_2(cm_samples=CM,step=ST)
+        a,x,v=ex.run_pressure_3(cm_samples=CM,step=ST)
         #ex.moveZ(1,1)
         print("Trial:",i+1,"Range:",a[-1]-a[0])
         print(x)
@@ -37,9 +37,9 @@ try:
         if data[i][0][0]>data[i][0][1] or data[i][0][1]>data[i][0][2] or data[i][0][2]>data[i][0][3] or data[i][0][3]>data[i][0][4]: #error detected
             log[i][1]=1
         plt.plot(x,a)
-        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/pressures",data)
+        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/pressures_soft",data)
         np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/errorlog",log)
-        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/vectors",vecs)
+        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/vectors_soft",vecs)
 except KeyboardInterrupt:
     print("Interrupt")
     ex.moveZ(1.5,1)

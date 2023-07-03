@@ -15,25 +15,25 @@ while COM=="":
         time.sleep(1)
 #B.moveZ(10)
 c=0
-ex=Experiment(B,th=0.7)
+ex=Experiment(B,split=10,th=1.5)
 #ex.moveZ(1,1)
 ex.moveX(2.5,1)
 samples=15
 speeds=[10,20,30,40]
 data=np.zeros((samples,len(speeds)))
-vecs=np.zeros((samples,len(speeds),ex.skin.origin.shape[0],2))
+vecs=np.zeros((samples,len(speeds),133,2))
 try:
     for i in range(samples):
         print("Trial:",i+1)
-        f,v=ex.test_speed(speeds)
+        f,v=ex.test_speed(speeds,mode=2)
         ex.moveZ(2,1)
         #save to main data
         data[i]=f
         vecs[i]=v.copy()
         weights = np.arange(1, len(speeds)+1)
         plt.plot(speeds,f,label="Exp"+str(i))
-        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speeds1",data)
-        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speed_vectors1",vecs)
+        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speeds2",data)
+        np.save("C:/Users/dexte/github/RoboSkin/code/Models/saved/speed_vectors2",vecs)
 except KeyboardInterrupt:
     print("Interrupt")
     ex.moveZ(1.5,1)
