@@ -17,7 +17,8 @@ def predict(reg,dat):
     return p
 
 path= letRun.path
-skin=sk.Skin(device=1)#videoFile=path+"Movement4.avi") #load skin object using demo video
+skin=sk.Skin(device=1)#videoFile=path+"push.avi" #load skin object using demo video
+skin.sharpen=False #falsify the sharpness if recorded with sharpness
 frame=skin.getFrame()
 h=frame.shape[1]*SIZE
 w=frame.shape[0]*SIZE
@@ -39,8 +40,9 @@ while True:
     points=predict(reg,np.array([frame]))[0]
     av=[0,0]
     for j,_ in enumerate(points):
-        #cv2.putText(frame_,str(j),(int(_[0]),int(_[1])),cv2.FONT_HERSHEY_SIMPLEX,0.3,(255,0,0))
-        cv2.circle(frame_,(int(_[0]),int(_[1])),2,(250,0,0),4)
+        cv2.putText(frame_,str(j),(int(_[0]),int(_[1])),cv2.FONT_HERSHEY_SIMPLEX,0.2,(255,0,0))
+        #cv2.circle(frame_,(int(initial[j][0]),int(initial[j][1])),2,(0,0,255),3)
+        #cv2.circle(frame_,(int(_[0]),int(_[1])),2,(250,0,0),4)
         #print((int(initial[j][0]),int(initial[j][1])),(int(_[0]),int(_[1])))
         cv2.arrowedLine(new,(int(initial[j][0]),int(initial[j][1])),(int(_[0]),int(_[1])), (0, 0, 0), thickness=2)
         av[0]+=_[0]
