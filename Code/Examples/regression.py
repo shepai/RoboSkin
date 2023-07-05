@@ -6,7 +6,7 @@ import RoboSkin as sk
 import numpy as np
 
 SIZE=0.3
-name="C:/Users/dexte/OneDrive/Documents/AI/Data_Labeller/pickle_imputer.pkl"
+name="C:/Users/dexte/OneDrive/Documents/AI/Data_Labeller/pickle_imputer_small.pkl" #use standard imputer or one for small
 reg=None
 with open(name,'rb') as file:
     reg=pickle.load(file)
