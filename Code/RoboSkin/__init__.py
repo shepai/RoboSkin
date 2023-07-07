@@ -57,7 +57,7 @@ class Skin: #skin object for detecting movement
             self.MAX=1000
         elif videoFile=="": self.cap = cv2.VideoCapture(device)
         else: self.cap = cv2.VideoCapture(videoFile)
-        self.sharpen=True
+        self.sharpen=False
         self.imF=copy.deepcopy(imageFile)
         self.vid=videoFile #save viceo file
         self.centre=np.array(self.getFrame().shape[0:-1])//2 #get centre of frame
