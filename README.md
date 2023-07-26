@@ -82,6 +82,12 @@ The result of plotting this is below:
 
 It is not a perfect method however helps find the general jist of movement.
 
+### Vector prediction via regression
+
+We have also trained a regression model to predict vectors. The benifits of this is the number of points will alays be (133,2) therefore can fit into other models. The trained models can be found in <a href="https://github.com/shepai/RoboSkin/tree/main/Code/Models/TacTip%20reader">Code/Models/TacTip Reader</a>. Another benifit is the model is not as affected by glare (unlike the previous vector prediction model). 
+
+<img src="Assets/images/regression.gif">
+
 ### Push prediction
 
 We may want to predict where the push is coming from within the sensor. This is done by chosing a grid size that will represent how large the receptive fields are. If our grid size is 5 then the tactile image will be viewed as a 5 $\times$ 5 image. 
