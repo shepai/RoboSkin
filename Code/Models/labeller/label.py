@@ -51,7 +51,11 @@ for i in range(length): #lop through all
     if len(lastFrames)>STORE: lastFrames.pop(0)
     if diff>0.01 and len(lastFrames)==STORE: #significant contact
         X.append(np.array(lastFrames)) #store temporal element
-        y.append([0,1,0,1,0])
+        y.append([1,0,0,1,0])
+    elif diff<0.004 and len(lastFrames)==STORE:
+        X.append(np.array(lastFrames)) #store temporal element
+        y.append([0,0,0,0,0])
+
     
     
 y=np.array(y)
