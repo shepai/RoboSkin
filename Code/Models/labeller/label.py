@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import pickle
 
-NAME="flat_detection.avi"
+NAME="edge_detection.avi"
 path= letRun.path
 skin=sk.Skin(videoFile=path+NAME)#videoFile=path+"Movement4.avi") #load skin object using demo video
 
@@ -36,7 +36,8 @@ initial_frame=frame.copy()
 
 X=[]
 y=[] #label as [edge surface soft hard slippery]
-
+lastFrames=[]
+STORE=5
 for i in range(length): #lop through all
     frame_=skin.getFrame()
     frame=cv2.resize(frame_,(int(h),int(w)),interpolation=cv2.INTER_AREA)
@@ -46,8 +47,10 @@ for i in range(length): #lop through all
     #get pressure map
     diff=np.sum(np.abs(initial_frame-frame))/(frame.shape[0]*3)
     vecs=initial-points
-    if diff>0.01: #significant contact
-        X.append(vecs)
+    lastFrames.append(vecs)
+    if len(lastFrames)>STORE: lastFrames.pop(0)
+    if diff>0.01 and len(lastFrames)==STORE: #significant contact
+        X.append(np.array(lastFrames)) #store temporal element
         y.append([0,1,0,1,0])
     
     
@@ -55,7 +58,7 @@ y=np.array(y)
 X=np.array(X)
 print(len(X),len(y))
 
-np.save("C:/Users/dexte/github/RoboSkin/Code/Models/labeller/X_data_push",X)
-np.save("C:/Users/dexte/github/RoboSkin/Code/Models/labeller/y_data_push",y)
+np.save("C:/Users/dexte/github/RoboSkin/Code/Models/labeller/X_data_edge",X)
+np.save("C:/Users/dexte/github/RoboSkin/Code/Models/labeller/y_data_edge",y)
 
 skin.close()
