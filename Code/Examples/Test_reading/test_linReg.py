@@ -44,6 +44,7 @@ def predict(reg1,dat):
 
 path= letRun.path
 skin=sk.Skin(videoFile=path+"push.avi")#videoFile=path+"push.avi") #load skin object using demo video
+skin.sharpen=False
 frame=skin.getFrame()
 h=frame.shape[1]*SIZE
 w=frame.shape[0]*SIZE
