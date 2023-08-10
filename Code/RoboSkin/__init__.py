@@ -174,16 +174,14 @@ class Skin: #skin object for detecting movement
         @param frame
         """
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        frame_gray=self.adaptive(frame_gray)
+        frame = cv2.adaptiveThreshold(
+            frame_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 1
+        )
+        
+        kernel = np.ones((2, 2), np.uint8)
+        frame = cv2.erode(frame, kernel, iterations=4)
         #remove the blobs
-        to_Show,spots=self.removeBlob(frame_gray)
-        to_Show=to_Show.astype(np.uint8)
-        spots=spots.astype(np.uint8)
-        #replace parts
-        inds=np.argwhere(to_Show == 255)
-        frame[inds[:,0],inds[:,1]]=[80,80,80]
-        inds=np.argwhere(spots == 255)
-        frame[inds[:,0],inds[:,1]]=[255,255,255]
+        
         return frame
     def getDots(self,gray,size=150,centre=None):
         """
@@ -212,10 +210,7 @@ class Skin: #skin object for detecting movement
         image=self.getFrame()
         gray=image
         if len(image.shape)==3: gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        binary = cv2.adaptiveThreshold(gray, 255,
-	cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 51,1)
-        kernel = np.ones((2,2),np.uint8)
-        binary = cv2.erode(binary,kernel,iterations = 2)
+        binary = self.get_processed(image)
         if adaptive: binary=self.adaptive(gray)
         if type(self.imF)!=type(""): return binary
         to_Show,spots=self.removeBlob(binary,min_size = min_size)
