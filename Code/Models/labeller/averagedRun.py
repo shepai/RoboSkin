@@ -241,6 +241,13 @@ optimizer = optim.SGD(model.parameters(), lr=0.0001)
 
 a1=np.zeros((20,500))
 for i in range(20):
+    # Create the neural network
+    model = SimpleConv2DNeuralNetwork([480, 128], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
+    #model=Network().to(device)
+
+    # Define the loss function and optimizer
+    criterion = nn.MSELoss()#nn.CrossEntropyLoss() #nn.MSELoss()
+    optimizer = optim.SGD(model.parameters(), lr=0.0001)
     loss,accuracy=train(model,500)
     a1[i]=accuracy
 
@@ -269,6 +276,13 @@ optimizer = optim.SGD(model.parameters(), lr=0.0001)
 
 a1=np.zeros((20,500))
 for i in range(20):
+    # Create the neural network
+    model = SimpleConv2DNeuralNetwork([480, 128], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
+    #model=Network().to(device)
+
+    # Define the loss function and optimizer
+    criterion = nn.MSELoss()#nn.CrossEntropyLoss() #nn.MSELoss()
+    optimizer = optim.SGD(model.parameters(), lr=0.0001)
     loss,accuracy=train(model,500)
     a1[i]=accuracy
 
