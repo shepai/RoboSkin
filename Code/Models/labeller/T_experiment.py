@@ -234,17 +234,10 @@ for t in range(1,T):
     X_tensor = torch.tensor(X).view(X.shape[0],1,X.shape[1],X.shape[2]).to(torch.float32).to(device)
     y_tensor = torch.tensor(Y).to(torch.float32).to(device)
     # Create the neural network
-    model = SimpleConv2DNeuralNetwork([480, 128], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
-    #model=Network().to(device)
-
-    # Define the loss function and optimizer
-    criterion = nn.MSELoss()#nn.CrossEntropyLoss() #nn.MSELoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.0001)
-
     
     for i in range(20):
         # Create the neural network
-        model = SimpleConv2DNeuralNetwork([480, 128], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
+        model = SimpleConv2DNeuralNetwork([96*t, 128], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
         #model=Network().to(device)
 
         # Define the loss function and optimizer
@@ -263,18 +256,12 @@ for t in range(1,T):
     # Convert data to PyTorch tensors
     X_tensor = torch.tensor(X).view(X.shape[0],1,X.shape[1],X.shape[2]).to(torch.float32).to(device)
     y_tensor = torch.tensor(Y).to(torch.float32).to(device)
-    # Create the neural network
-    model = SimpleConv2DNeuralNetwork([480, 128], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
-    #model=Network().to(device)
 
-    # Define the loss function and optimizer
-    criterion = nn.MSELoss()#nn.CrossEntropyLoss() #nn.MSELoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.0001)
 
     a2=np.zeros((T,20,500))
     for i in range(20):
         # Create the neural network
-        model = SimpleConv2DNeuralNetwork([480, 128], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
+        model = SimpleConv2DNeuralNetwork([96*t, 128], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
         #model=Network().to(device)
 
         # Define the loss function and optimizer
