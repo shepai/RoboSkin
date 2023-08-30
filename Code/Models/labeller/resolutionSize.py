@@ -234,8 +234,8 @@ for i in range(0,6):
     print(np.sum(X))
     ya=ya/10
     X, data_test, Y, labels_test = train_test_split(X, ya, test_size=0.20, random_state=42)
-    X_tensor = torch.tensor(X, dtype=torch.float32).to(device)
-    y_tensor = torch.tensor(Y, dtype=torch.float32).to(device)
+    X_tensor = torch.tensor(X).view(X.shape[0],1,X.shape[1],X.shape[2]).to(torch.float32).to(device)
+    y_tensor = torch.tensor(Y).to(torch.float32).to(device)
     n_inputs = X.shape[1]
     m_outputs = Y.shape[1]
     for j in range(trials):
