@@ -222,59 +222,38 @@ def train(model,num_epochs,output=True):
             a=get_acc(predictions.cpu(),should_be=labels_test)
             print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}","Accuracy Train:",accuracy[-1],"Accuracy test:",a)
     return np.array(loss_ar),np.array(accuracy)
-T=15
-a1=np.zeros((T,20,500))
-for t in range(1,T):
-    # Define the neural network model
-    X, data_test, Y, labels_test = create_dataset(["lego.avi","smooth.avi"],t)
+
+trials=20
+a2=np.zeros((len(range(0,6)),trials,500))
+for i in range(0,6):
+    torch.cuda.empty_cache() 
+    d=dataset(names=["lego.avi","smooth.avi"])
+    size=0.3-(0.05*i)
+    d.SIZE=size
+    X,ya=d.gen_image_data(STORE=5,y_labels=[[1,0],[0,1]],scale=True)
+    print(np.sum(X))
+    ya=ya/10
+    X, data_test, Y, labels_test = train_test_split(X, ya, test_size=0.20, random_state=42)
+    X_tensor = torch.tensor(X, dtype=torch.float32).to(device)
+    y_tensor = torch.tensor(Y, dtype=torch.float32).to(device)
     n_inputs = X.shape[1]
     m_outputs = Y.shape[1]
-    print(X.shape)
-    # Convert data to PyTorch tensors
-    X_tensor = torch.tensor(X).view(X.shape[0],1,X.shape[1],X.shape[2]).to(torch.float32).to(device)
-    y_tensor = torch.tensor(Y).to(torch.float32).to(device)
-    # Create the neural network
-    
-    for i in range(20):
+    for j in range(trials):
         # Create the neural network
-        model = SimpleConv2DNeuralNetwork([96*t, 128], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
+        #Create the neural network
+        model = SimpleConv2DNeuralNetwork([X.shape[1], X.shape[2]], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
         #model=Network().to(device)
 
         # Define the loss function and optimizer
         criterion = nn.MSELoss()#nn.CrossEntropyLoss() #nn.MSELoss()
-        optimizer = optim.SGD(model.parameters(), lr=0.0001)
+        optimizer = optim.SGD(model.parameters(), lr=0.001)
         loss,accuracy=train(model,500)
-        a1[t][i]=accuracy
+        a2[i][j]=accuracy
+        
 
-np.save("/its/home/drs25/RoboSkin/Code/Models/surfaceModel/accuracyDataLegT",a1)
-a2=np.zeros((T,20,500))
-for t in range(1,T):
-    # Define the neural network model
-    X, data_test, Y, labels_test = create_dataset(["concrete2.avi","smooth.avi"],t)
-    n_inputs = X.shape[1]
-    m_outputs = Y.shape[1]
-    print(X.shape)
-    # Convert data to PyTorch tensors
-    X_tensor = torch.tensor(X).view(X.shape[0],1,X.shape[1],X.shape[2]).to(torch.float32).to(device)
-    y_tensor = torch.tensor(Y).to(torch.float32).to(device)
-
-
-    
-    for i in range(20):
-        # Create the neural network
-        model = SimpleConv2DNeuralNetwork([96*t, 128], m_outputs,layers=[1000],drop_out_prob=0.1).to(device)
-        #model=Network().to(device)
-
-        # Define the loss function and optimizer
-        criterion = nn.MSELoss()#nn.CrossEntropyLoss() #nn.MSELoss()
-        optimizer = optim.SGD(model.parameters(), lr=0.0001)
-        loss,accuracy=train(model,500)
-        a2[t][i]=accuracy
-
-np.save("/its/home/drs25/RoboSkin/Code/Models/surfaceModel/accuracyDataConT",a2)
+np.save("/its/home/drs25/RoboSkin/Code/Models/surfaceModel/accuracyRes",a2)
 
 
 print("*************************************")
-print("Lego classification: ",np.max(a1))
-print("Concrete classification: ",np.max(a2))
+print("Lego classification: ",np.max(a2))
 print("*************************************")
