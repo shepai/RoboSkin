@@ -210,14 +210,15 @@ def train(model,num_epochs,output=True):
         #predict
         with torch.no_grad():
             model.eval()
-            predictions = model(X_tensor)
-        a=get_acc(predictions.cpu(),should_be=Y)
+            predictions = model(test_x_tensor)
+        a=get_acc(predictions.cpu(),should_be=labels_test)
+        
         accuracy.append(a)
         # Print the current loss to monitor training progress
         if epoch%100==0 and output:
             with torch.no_grad():
                  model.eval()
-                 predictions = model(torch.tensor(data_test, dtype=torch.float32).view(data_test.shape[0],1,data_test.shape[1],data_test.shape[2]).to(device))
+                 predictions = model(test_x_tensor)
 
             a=get_acc(predictions.cpu(),should_be=labels_test)
             print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}","Accuracy Train:",accuracy[-1],"Accuracy test:",a)
@@ -236,6 +237,7 @@ for i in range(0,6):
     X, data_test, Y, labels_test = train_test_split(X, ya, test_size=0.20, random_state=42)
     X_tensor = torch.tensor(X).view(X.shape[0],1,X.shape[1],X.shape[2]).to(torch.float32).to(device)
     y_tensor = torch.tensor(Y).to(torch.float32).to(device)
+    test_x_tensor = torch.tensor(data_test, dtype=torch.float32).view(data_test.shape[0],1,data_test.shape[1],data_test.shape[2]).to(device)
     n_inputs = X.shape[1]
     m_outputs = Y.shape[1]
     for j in range(trials):
@@ -247,11 +249,11 @@ for i in range(0,6):
         # Define the loss function and optimizer
         criterion = nn.MSELoss()#nn.CrossEntropyLoss() #nn.MSELoss()
         optimizer = optim.SGD(model.parameters(), lr=0.001)
-        loss,accuracy=train(model,500)
+        loss,accuracy=train(model,200)
         a2[i][j]=accuracy
         
 
-np.save("/its/home/drs25/RoboSkin/Code/Models/surfaceModel/accuracyRes",a2)
+np.save("/its/home/drs25/RoboSkin/Code/Models/surfaceModel/accuracyResTest",a2)
 
 
 print("*************************************")
