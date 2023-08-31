@@ -223,9 +223,10 @@ def train(model,num_epochs,output=True):
             a=get_acc(predictions.cpu(),should_be=labels_test)
             print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}","Accuracy Train:",accuracy[-1],"Accuracy test:",a)
     return np.array(loss_ar),np.array(accuracy)
-
+import time
+t1=time.time()
 trials=20
-a2=np.zeros((len(range(0,6)),trials,500))
+a2=np.zeros((len(range(0,6)),trials,200))
 for i in range(0,6):
     torch.cuda.empty_cache() 
     d=dataset(names=["lego.avi","smooth.avi"])
@@ -258,4 +259,5 @@ np.save("/its/home/drs25/RoboSkin/Code/Models/surfaceModel/accuracyResTest",a2)
 
 print("*************************************")
 print("Lego classification: ",np.max(a2))
+print("Time it took:",(time.time()-t1)/(60*60),"hours")
 print("*************************************")
