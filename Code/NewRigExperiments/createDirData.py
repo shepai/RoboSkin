@@ -48,7 +48,7 @@ class dataset:
                 clear()
                 if len(np.array(self.X).shape)>=2:
                     print("Dataset size:",(i*index)+index,"\nWindow size:",self.X[0].shape[0],"\nImage:",self.X[0].shape[1:])
-                    print("Approximate percentage:",round((((i*(index+1))+index)/(len(files[start:end])*len(files)))*100,2),"%")
+                    print("Approximate percentage:",round((((i*(index+1))+index)/(len(frame)*len(files[start:end])))*100,2),"%")
                     print("Memory needed:",round(self.getSize("/its/home/drs25/Documents/data/Tactile Dataset/Directions/directions_X_data_"+names[i+start]+".npz")/ 1024 / 1024/ 1024,2),"GB")
                     print("Time lapsed:",(time.time()-t1)/60,"minutes")
                 if index%20==0:

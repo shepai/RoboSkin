@@ -21,7 +21,8 @@ class dataset:
         t1=time.time()
         names=[folder.split("/")[8].split("_")[1] for folder in self.pathways]
         time.sleep(2)
-
+        for i,name in enumerate(names):
+            self.keys[name]=i
         for i,path in enumerate(self.pathways[start:end]): #loop through paths
             self.keys[i]=path.split("/")[-2]
             files=list_files(path)
@@ -43,7 +44,7 @@ class dataset:
                                 #a[j] = cv2.cvtColor(a[j], cv2.COLOR_BGR2GRAY)
                         window=a.copy()
                         self.X.append(window.astype(np.int8))
-                        self.y.append(i+start)
+                        self.y.append(self.keys[names[i+start]])
                 clear()
                 if len(np.array(self.X).shape)>=2:
                     print("Dataset size:",(i*k)+k,"\nWindow size:",self.X[0].shape[0],"\nImage:",self.X[0].shape[1:])
