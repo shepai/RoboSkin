@@ -12,7 +12,7 @@ from dataset_unloader import dataset
 t1=time.time()
 clear = lambda: os.system('clear')
 
-path_to_files="C:/Users/dexte/Documents/test/"
+path_to_files="C:/Users/dexte/Documents/Datasets/raw_tactile/"
 path_to_output="C:/Users/dexte/Documents/dataset/tactile/"
 #########################################################################
 #Gather all folders and process them into classes
@@ -26,21 +26,26 @@ className=[]
 list_of_labels=[]
 for i in range(len(f)):
     f[i]=dirpath+f[i]
-    folder=f[i].split("/")[5].split("_")[1]
+    folder=f[i].split("/")[6].split("_")[1]
     if folder in className:
         list_of_labels.append(className.index(folder))
     else:
         list_of_labels.append(len(className))
         className.append(folder)
-print("\tFolders:",f)
-print("\tLabels:",list_of_labels)
-print("\tClasses:",className)
+
+def output_message(string):
+    clear()
+    print("\tFolders:",f)
+    print("\tLabels:",list_of_labels)
+    print("\tClasses:",className)
+    print(string)
 
 #########################################################################
 #concat into one folder per class
 #########################################################################
 temp_dir = tempfile.TemporaryDirectory()
 for i,file in enumerate(f):
+    output_message("Processing... "+str(i)+"/"+str(len(f)))
     data=dataset(file,temp_dir,20,compression_dim=0.4,delay=0,crop=[60,180,40,150],label=list_of_labels[i]) #read as dataset and convert
     del data
 print("Creating Temp:",temp_dir.name)
@@ -67,6 +72,7 @@ for i,class_ in enumerate(new_classes):
 X=np.zeros((size_x,*shape_x))+1 #load into memory
 marker=0
 for i,class_ in enumerate(new_classes):
+    output_message("Compressing X data... "+str(i)+"/"+str(len(new_classes)))
     filename=temp_dir.name+"/"+class_
     with np.load(filename) as data:  #load data
         for array_name in data:
@@ -80,6 +86,7 @@ del X
 y=np.zeros((size_x,))+1 #load into memory
 marker=0
 for i,class_ in enumerate(new_classes):
+    output_message("Compressing y data... "+str(i)+"/"+str(len(new_classes)))
     label=int(class_.split("_")[1].split(".")[0])
     filename=temp_dir.name+"/"+class_
     with np.load(filename) as data:  #load data
