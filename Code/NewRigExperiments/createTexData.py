@@ -42,7 +42,7 @@ print("\tClasses:",className)
 temp_dir = tempfile.TemporaryDirectory()
 for i,file in enumerate(f):
     data=dataset(file,temp_dir,20,compression_dim=0.4,delay=0,crop=[60,180,40,150],label=list_of_labels[i]) #read as dataset and convert
-    
+    del data
 print("Creating Temp:",temp_dir.name)
 print("\nDataset sorted...\nCompressing...")
 #########################################################################
