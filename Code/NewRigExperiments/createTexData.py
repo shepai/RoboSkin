@@ -13,7 +13,7 @@ t1=time.time()
 clear = lambda: os.system('clear')
 
 path_to_files="C:/Users/dexte/Documents/Datasets/raw_tactile/"
-path_to_output="C:/Users/dexte/Documents/dataset/tactile/"
+path_to_output="C:/Users/dexte/Documents/Datasets/tactile/"
 #########################################################################
 #Gather all folders and process them into classes
 #########################################################################
