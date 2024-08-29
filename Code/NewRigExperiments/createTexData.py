@@ -8,12 +8,13 @@ from os import walk
 import os
 import time
 import tempfile
-from dataset_unloader import dataset
+from dataset_unloader import dataset, dataset_presstip
 t1=time.time()
 clear = lambda: os.system('clear')
 
-path_to_files="C:/Users/dexte/Documents/Datasets/raw_tactile/"
-path_to_output="C:/Users/dexte/Documents/Datasets/tactile/"
+path_to_files="/its/home/drs25/Documents/data/Tactile Dataset/presstip/"
+path_to_output="/its/home/drs25/Documents/data/Tactile Dataset/presstip/"
+filename__="X_data_presstip.npz"
 #########################################################################
 #Gather all folders and process them into classes
 #########################################################################
@@ -25,8 +26,8 @@ for (dirpath, dirnames, filenames) in walk(path_to_files):
 className=[]
 list_of_labels=[]
 for i in range(len(f)):
+    folder=f[i].split("_")[1]
     f[i]=dirpath+f[i]
-    folder=f[i].split("/")[6].split("_")[1]
     if folder in className:
         list_of_labels.append(className.index(folder))
     else:
@@ -41,12 +42,16 @@ def output_message(string):
     print(string)
 
 #########################################################################
-#concat into one folder per class
+#concat into one folder per class 
 #########################################################################
 temp_dir = tempfile.TemporaryDirectory()
+data=None
 for i,file in enumerate(f):
     output_message("Processing... "+str(i)+"/"+str(len(f)))
-    data=dataset(file,temp_dir,20,compression_dim=0.4,delay=0,crop=[60,180,40,150],label=list_of_labels[i]) #read as dataset and convert
+    try:
+        data=dataset(file,temp_dir,20,compression_dim=0.4,delay=0,crop=[60,180,40,150],label=list_of_labels[i]) #read as dataset and convert
+    except:
+        data=dataset_presstip(file,temp_dir,20,compression_dim=0.4,delay=0,crop=[60,180,40,150],label=list_of_labels[i])
     del data
 print("Creating Temp:",temp_dir.name)
 print("\nDataset sorted...\nCompressing...")
@@ -80,7 +85,7 @@ for i,class_ in enumerate(new_classes):
             marker+=len(data[array_name])
             break
         
-np.savez_compressed(path_to_output+"X_data.npz",X)
+np.savez_compressed(path_to_output+filename__,X)
 del X
 #create_y
 y=np.zeros((size_x,))+1 #load into memory
@@ -94,7 +99,7 @@ for i,class_ in enumerate(new_classes):
             y[marker:marker+len(data[array_name])]=label #copy over contents
             marker+=len(data[array_name])
             break
-np.savez_compressed(path_to_output+"y_data.npz",y)
+np.savez_compressed(path_to_output+filename__.replace("X","y"),y)
 del y
 
 print("Data compressed!",round((time.time()-t1)/(60*60),3),"Hours")
