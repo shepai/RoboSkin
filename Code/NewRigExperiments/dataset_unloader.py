@@ -41,7 +41,6 @@ class dataset_presstip:
         self.pathway=pathway
         self.T=temporal_window
         self.X=[]
-        new_dim=(int(640*compression_dim),int(480*compression_dim))
         self.keys={}
 
         files = [f for f in listdir(pathway) if isfile(join(pathway, f))]
@@ -51,12 +50,9 @@ class dataset_presstip:
                 data = np.load(self.pathway+"/"+file) #load data
                 for array_name in data:
                     data=data[array_name].reshape(100,16)
-                    window=data[::4][delay:delay+temporal_window]
-                    a=np.zeros((len(window),new_dim[1],new_dim[0],))
-                    
-                            #a[j] = cv2.cvtColor(a[j], cv2.COLOR_BGR2GRAY)
-                    window=a.copy()
-                    self.X.append(window.astype(np.int8))
-            
+                    window=data[delay:delay+temporal_window]
+                    self.X.append(window)
         self.X=np.array(self.X)
+        print(self.X.shape,tempdir.name+"/X_"+str(label)+".npz")
+
         np.savez_compressed(tempdir.name+"/X_"+str(label)+".npz", self.X)
