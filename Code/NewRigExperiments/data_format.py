@@ -48,17 +48,18 @@ def gen3DData(frm,to,percentage=1,n=-1):
     data.resize(percentage)
     data.X=data.X[:n]
     data.y=data.y[:n]
-    return org_data(data, (len(data.X[0:n]),1,abs(frm-to),data.X.shape[2],data.X.shape[3]),n=n)
+    return org_data(data, (len(data.X),1,abs(frm-to),data.X.shape[2],data.X.shape[3]),n=n)
     
 def genLSTMData(frm,to,percentage=1,n=-1):
     torch.cuda.empty_cache()
     data=loaded(to,from_=frm,filename="X_data_15.npz")
     data.applySobel()
-    data.augment()
+    #data.augment()
     data.resize(percentage)
     data.X=data.X[:n]
     data.y=data.y[:n]
-    return org_data(data, (len(data.X[0:n]),abs(frm-to),data.X.shape[2]*data.X.shape[3]),n=n)
+    #print(data.X.shape,(len(data.X),abs(frm-to),data.X.shape[2]*data.X.shape[3]))
+    return org_data(data, (len(data.X),abs(frm-to),data.X.shape[2]*data.X.shape[3]),n=n)
 def genCNNLSTMData(frm,to,percentage=1,n=-1):
     torch.cuda.empty_cache()
     data=loaded(to,from_=frm,filename="X_data_15.npz")
@@ -67,7 +68,7 @@ def genCNNLSTMData(frm,to,percentage=1,n=-1):
     data.resize(percentage)
     data.X=data.X[:n]
     data.y=data.y[:n]
-    return org_data(data, (len(data.X[0:n]),1,abs(frm-to),data.X.shape[2],data.X.shape[3]),n=n)
+    return org_data(data, (len(data.X),1,abs(frm-to),data.X.shape[2],data.X.shape[3]),n=n)
 
 
 def org_data(data,shape,n=-1):
