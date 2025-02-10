@@ -99,8 +99,8 @@ class loaded:
             augmented_dataY.append(dataY.copy())  # Labels remain the same
         augmented_dataX=np.array(augmented_dataX)
         augmented_dataY=np.array(augmented_dataY)
-        self.X=augmented_dataX.reshape((len(zoom_factors)*augmented_dataX.shape[1],*augmented_dataX.shape[2:]))
-        self.y=augmented_dataY.reshape((len(zoom_factors)*augmented_dataY.shape[1],))
+        self.X=np.concatenate([self.X,augmented_dataX.reshape((len(zoom_factors)*augmented_dataX.shape[1],*augmented_dataX.shape[2:]))])
+        self.y=np.concatenate([self.y,augmented_dataY.reshape((len(zoom_factors)*augmented_dataY.shape[1],))])
         
     def resize(self,percentage):
         h=int(self.X.shape[2]*percentage)
