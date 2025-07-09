@@ -2,6 +2,7 @@
 import os
 from tempfile import mkdtemp
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder
 
 def load_files_memory_efficient(directory, type_="standard", temp_dir=None,pressures=""):
     if temp_dir is None:
@@ -113,6 +114,9 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
     except:
         pass
     final_data=final_data.reshape((len(file_paths)*200, 20, 355, 328))
+
+    encoder = OneHotEncoder()
+    final_labels = encoder.fit_transform(final_labels)
     return final_data, final_labels
 
 if __name__=="__main__":
