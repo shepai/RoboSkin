@@ -94,7 +94,7 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
         
         # Write to memmap
         data_memmap[current_idx:current_idx + num_samples] = data.flatten()
-        label_memmap[current_idx:current_idx + 200] = np.ones((num_samples,)) * num
+        label_memmap[current_idx:current_idx + 200] = np.ones((200,)) * num
         
         current_idx += num_samples
     
