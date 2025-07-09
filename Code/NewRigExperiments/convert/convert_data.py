@@ -12,7 +12,7 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
     file_paths = []
     labels=['Carpet', 'LacedMatt', 'wool', 'Cork', 'Felt', 'LongCarpet', 'cotton', 'Plastic', 'Flat', 'foamf', 'foamg', 'bubble', 'foame', 'jeans', 'Leather']
     keys = {labels[i].lower():i for i in range(len(labels))}
-    for item in os.listdir(directory)[0:10]:
+    for item in os.listdir(directory):
         full_path = os.path.join(directory, item)
         if not os.path.isfile(full_path):
             continue
@@ -68,9 +68,7 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
     else:
         data_memmap = np.memmap(data_memmap_path, dtype=np.uint8, mode='w+', shape=(total_samples,))
 
-    label_memmap = np.memmap(label_memmap_path, dtype=np.uint8, mode='w+',
-                            shape=(200*len(file_path),))
-    
+    labels=[]
     # Second pass: process files one at a time
     current_idx = 0
     for file_path in file_paths:
@@ -94,24 +92,21 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
         
         # Write to memmap
         data_memmap[current_idx:current_idx + num_samples] = data.flatten()
-        label_memmap[current_idx:current_idx + 200] = np.ones((200,)) * num
+        labels.append([num for i in range(200)])
         
         current_idx += num_samples
     
     # Flush changes to disk
     data_memmap.flush()
-    label_memmap.flush()
     
     # Reload as regular arrays (or keep as memmap if you prefer)
     final_data = np.array(data_memmap)
-    final_labels = np.array(label_memmap)
+    final_labels = np.array(labels).flatten()
     
     # Clean up temporary files
     del data_memmap
-    del label_memmap
     try:
         os.remove(data_memmap_path)
-        os.remove(label_memmap_path)
     except:
         pass
     final_data=final_data.reshape((len(file_paths)*200, 20, 355, 328))
@@ -123,3 +118,4 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
 if __name__=="__main__":
     test="/its/home/drs25/.cache/kagglehub/datasets/dextershepherd/tactip-alternative-morphology-b/versions/1/"
     final_data,final_labels=load_files_memory_efficient(test)
+    print(final_data.shape,final_labels.shape)
