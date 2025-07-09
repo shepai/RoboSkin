@@ -12,7 +12,7 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
     file_paths = []
     labels=['Carpet', 'LacedMatt', 'wool', 'Cork', 'Felt', 'LongCarpet', 'cotton', 'Plastic', 'Flat', 'foamf', 'foamg', 'bubble', 'foame', 'jeans', 'Leather']
     keys = {labels[i].lower():i for i in range(len(labels))}
-    for item in os.listdir(directory):
+    for item in os.listdir(directory)[0:10]:
         full_path = os.path.join(directory, item)
         if not os.path.isfile(full_path):
             continue
@@ -45,6 +45,7 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
     
     # Calculate total size needed
     total_samples = 0
+    total_y=0
     for file_path in file_paths:
         try:
             data = np.load(file_path)
@@ -68,7 +69,7 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
         data_memmap = np.memmap(data_memmap_path, dtype=np.uint8, mode='w+', shape=(total_samples,))
 
     label_memmap = np.memmap(label_memmap_path, dtype=np.uint8, mode='w+',
-                            shape=(total_samples,))
+                            shape=(200*len(file_path),))
     
     # Second pass: process files one at a time
     current_idx = 0
@@ -93,7 +94,7 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
         
         # Write to memmap
         data_memmap[current_idx:current_idx + num_samples] = data.flatten()
-        label_memmap[current_idx:current_idx + num_samples] = np.ones((num_samples,)) * num
+        label_memmap[current_idx:current_idx + 200] = np.ones((num_samples,)) * num
         
         current_idx += num_samples
     
@@ -116,7 +117,7 @@ def load_files_memory_efficient(directory, type_="standard", temp_dir=None,press
     final_data=final_data.reshape((len(file_paths)*200, 20, 355, 328))
 
     encoder = OneHotEncoder()
-    final_labels = encoder.fit_transform(final_labels)
+    final_labels = encoder.fit_transform(final_labels.reshape((-1,1)))
     return final_data, final_labels
 
 if __name__=="__main__":
